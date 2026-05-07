@@ -85,7 +85,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 .action-buttons.visible { opacity: 1; pointer-events: auto; animation: slideUp 0.3s cubic-bezier(.34,1.56,.64,1); }
 
 .abtn {
-  width: 32%;
+  width: 34%;
   height: auto;
   object-fit: contain;
   cursor: pointer;
@@ -93,7 +93,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
   filter: drop-shadow(0 6px 14px rgba(0,0,0,.45));
 }
 .abtn:active { transform: scale(0.94); }
-.abtn.main { width: 36%; }
+.abtn.main { width: 34%; }  /* 保持和次按钮同宽，视觉差异靠金色 glow + 皇冠 icon 传达 */
 
 @keyframes slideUp { from{ transform: translateY(40px); opacity: 0 } to{ transform: translateY(0); opacity: 1 } }
 
@@ -852,8 +852,8 @@ function enterActionChoice() {
   exitSelection();
   currentState = 'ACTION_CHOICE';
   actionPrimary.classList.add('visible');
-  // hand on Appraise (right button), slightly above so fingertip points down at button
-  moveHandTo(68, 67, 'tap');
+  // hand 在 Appraise 按钮正上方，指尖贴近按钮顶沿
+  moveHandTo(68, 64, 'tap');
   resetIdle();
 }
 function exitActionChoice() {
@@ -923,7 +923,7 @@ function enterAppraisal() {
       // 4) Show Recruit/Dismiss buttons
       setTimeout(() => {
         actionSecondary.classList.add('visible');
-        moveHandTo(70, 73, 'tap'); // on Recruit (right button, main)
+        moveHandTo(70, 64, 'tap'); // 指尖贴近 Recruit 按钮顶沿
         resetIdle();
       }, CONFIG.RATING_DROP_DURATION_MS);
     }, order.length * CONFIG.STATS_REVEAL_INTERVAL_MS + 200);
