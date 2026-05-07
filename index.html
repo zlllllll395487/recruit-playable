@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Recruit — Playable Demo</title>
+<style>
+/* ============ Reset ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; color: #fff; }
+
+/* ============ Stage 9:16 ============ */
+.stage {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: min(100vw, calc(100vh * 9 / 16));
+  height: min(100vh, calc(100vw * 16 / 9));
+  background: #111;
+  overflow: hidden;
+}
+
+/* ============ Layers ============ */
+.layer { position: absolute; inset: 0; pointer-events: none; }
+.layer.interactive { pointer-events: auto; }
+
+.bg-layer      { z-index: 0; background: #1a1222 center/cover no-repeat; }
+.hero-layer    { z-index: 1; pointer-events: auto; }
+.fg-layer      { z-index: 2; }
+.ui-layer      { z-index: 3; }
+.vfx-layer     { z-index: 4; pointer-events: none; }
+.tutorial-layer{ z-index: 5; pointer-events: none; }
+.video-layer   { z-index: 6; display: none; background: #000; }
+.endcard-layer { z-index: 7; display: none; background: rgba(0,0,0,.9); }
+.preloader     { z-index: 100; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+/* ============ Preloader ============ */
+.preloader .bar { width: 60%; height: 6px; background: #222; border-radius: 3px; margin-top: 20px; overflow: hidden; }
+.preloader .bar-inner { width: 0%; height: 100%; background: linear-gradient(90deg, #6FC3FF, #FF4D7A, #FFD661); transition: width 0.2s; }
+.preloader .label { font-size: 14px; color: #aaa; letter-spacing: 2px; }
+.preloader .pct { margin-top: 8px; font-size: 12px; color: #666; }
+
+/* ============ BG ============ */
+.bg-layer { background-image: url('assets/bg_recruitment.png'); }
+
+/* ============ Hero track (3 heroes side-by-side) ============ */
+.hero-track { position: absolute; top: 0; left: 0; width: 300%; height: 100%; display: flex; transition: transform 0.35s cubic-bezier(.22,.8,.3,1); }
+.hero-slot  { position: relative; width: 33.3333%; height: 100%; }
+.hero-img {
+  position: absolute; bottom: 14%;
+  left: 50%; transform: translateX(-50%);
+  height: 68%;
+  width: auto;
+  filter: drop-shadow(0 10px 30px rgba(0,0,0,.5));
+  transition: filter 0.3s;
+}
+.hero-slot.active .hero-img {
+  animation: heroBreath 3s ease-in-out infinite;
+}
+.hero-slot.active .hero-outline {
+  opacity: 1;
+  animation: outlinePulse 1.4s ease-in-out infinite;
+}
+.hero-outline {
+  position: absolute; bottom: 14%; left: 50%; transform: translateX(-50%);
+  height: 68%; width: auto;
+  pointer-events: none;
+  opacity: 0;
+  filter: drop-shadow(0 0 16px var(--accent, #6FC3FF)) drop-shadow(0 0 32px var(--accent, #6FC3FF));
+  transition: opacity 0.3s;
+}
+
+@keyframes heroBreath { 0%,100%{ transform: translateX(-50%) translateY(0) } 50%{ transform: translateX(-50%) translateY(-6px) } }
+@keyframes outlinePulse { 0%,100%{ opacity: 0.55 } 50%{ opacity: 1 } }
+
+/* ============ FG hands ============ */
+.fg-layer img { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; pointer-events: none; }
+
+/* ============ UI: Action buttons ============ */
+.action-buttons {
+  position: absolute; bottom: 22%; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 5%;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.action-buttons.visible { opacity: 1; pointer-events: auto; animation: slideUp 0.3s cubic-bezier(.34,1.56,.64,1); }
+
+.abtn {
+  width: 32%;
+  height: auto;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.15s;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.45));
+}
+.abtn:active { transform: scale(0.94); }
+.abtn.main { width: 36%; }
+
+@keyframes slideUp { from{ transform: translateY(40px); opacity: 0 } to{ transform: translateY(0); opacity: 1 } }
+
+/* ============ UI: Stat panels ============ */
+.stat-panels {
+  position: absolute; inset: 0; pointer-events: none;
+}
+.stat-panel {
+  position: absolute; width: 32%; aspect-ratio: 669 / 373;
+  background: url('assets/panel_stat.png') no-repeat center/contain;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 0 22% 0 8%;
+  opacity: 0; transform: scale(0);
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,.5));
+}
+.stat-panel.visible { animation: statPop 0.4s cubic-bezier(.34,1.56,.64,1) forwards; }
+.stat-panel .label { font-size: min(2.2vw, 11px); color: #E9D5FF; letter-spacing: 1px; text-transform: uppercase; line-height: 1.1; text-align: center; }
+.stat-panel .value { font-size: min(4.8vw, 24px); font-weight: 900; color: #fff; text-shadow: 0 0 10px rgba(168,85,247,.8); line-height: 1.1; text-align: center; }
+.stat-panel .tag {
+  position: absolute; top: -16%; right: -2%;
+  width: 32%; aspect-ratio: 677 / 369;
+  background: url('assets/tag_ssr_plus.png') no-repeat center/contain;
+}
+.stat-panel[data-pos="tl"] { top: 16%;  left: 3%; }
+.stat-panel[data-pos="tr"] { top: 16%;  right: 3%; }
+.stat-panel[data-pos="br"] { top: 28%;  right: 3%; }
+
+@keyframes statPop {
+  0% { opacity: 0; transform: scale(0) rotate(-8deg); }
+  60% { transform: scale(1.1) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+/* ============ ELITE banner ============ */
+.elite-banner {
+  position: absolute; top: 48%; left: 50%;
+  width: 85%; aspect-ratio: 900 / 320;
+  transform: translate(-50%, -50%) translateY(-100vh) scale(1.2);
+  background: url('assets/banner_elite.png') no-repeat center/contain;
+  opacity: 0;
+  filter: drop-shadow(0 0 30px rgba(255,215,0,.8));
+}
+.elite-banner.drop {
+  animation: eliteDrop 0.5s cubic-bezier(.4,1.8,.6,1) forwards,
+             eliteShake 0.4s 0.5s ease-in-out;
+}
+@keyframes eliteDrop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) translateY(-100vh) scale(1.3); }
+  70%  { opacity: 1; transform: translate(-50%, -50%) translateY(8px) scale(1.05); }
+  100% { opacity: 1; transform: translate(-50%, -50%) translateY(0) scale(1); }
+}
+@keyframes eliteShake {
+  0%,100% { transform: translate(-50%, -50%); }
+  25% { transform: translate(-50%, -50%) translateX(-6px); }
+  50% { transform: translate(-50%, -50%) translateX(6px); }
+  75% { transform: translate(-50%, -50%) translateX(-3px); }
+}
+
+/* ============ Speech bubble (Talk path) ============ */
+.speech-bubble {
+  position: absolute; top: 14%; left: 50%;
+  transform: translateX(-50%) scale(0);
+  max-width: 70%; padding: 16px 22px;
+  background: rgba(255,255,255,.95); color: #222;
+  border-radius: 20px;
+  font-size: min(3.6vw, 16px); font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  text-align: center;
+  opacity: 0;
+}
+.speech-bubble::after {
+  content: ''; position: absolute; bottom: -10px; left: 50%;
+  transform: translateX(-50%);
+  border: 10px solid transparent; border-top-color: rgba(255,255,255,.95);
+}
+.speech-bubble.visible {
+  animation: bubbleIn 0.3s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes bubbleIn {
+  from { transform: translateX(-50%) scale(0); opacity: 0; }
+  to   { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+/* ============ VFX: scanline ============ */
+.scanline {
+  position: absolute; left: 0; right: 0;
+  height: 6%;
+  background: url('assets/vfx_scanline.png') no-repeat center/100% 100%;
+  opacity: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  filter: drop-shadow(0 0 16px rgba(168,85,247,.9));
+}
+.scanline.active { animation: scanMove 0.6s linear; }
+@keyframes scanMove {
+  0%   { top: 6%; opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { top: 90%; opacity: 0; }
+}
+
+/* ============ VFX: shockwave ============ */
+.shockwave {
+  position: absolute; top: 50%; left: 50%;
+  width: 40%; aspect-ratio: 677 / 369;
+  transform: translate(-50%, -50%) scale(0);
+  background: url('assets/vfx_shockwave.png') no-repeat center/contain;
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+.shockwave.active { animation: shockOut 0.8s ease-out; }
+@keyframes shockOut {
+  0%   { transform: translate(-50%, -50%) scale(0.2); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+}
+
+/* ============ VFX: golden particles ============ */
+.particles {
+  position: absolute; inset: 0;
+  display: none;
+}
+.particles.active { display: block; }
+.particle {
+  position: absolute; bottom: -10%;
+  width: 28px; height: 28px;
+  background: url('assets/vfx_particle_gold.png') no-repeat center/contain;
+  opacity: 0;
+  animation: floatUp 3s linear infinite;
+  mix-blend-mode: screen;
+}
+@keyframes floatUp {
+  0%   { transform: translateY(0) scale(0.6); opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { transform: translateY(-120vh) scale(1.2); opacity: 0; }
+}
+
+/* ============ VFX: vignette (recruit stage) ============ */
+.vignette {
+  position: absolute; inset: 0;
+  background: url('assets/vfx_vignette.png') no-repeat center/cover;
+  opacity: 0;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transition: opacity 0.4s;
+}
+.vignette.active { opacity: 1; }
+
+/* ============ Tutorial hand ============ */
+.hand {
+  position: absolute;
+  width: 38%; aspect-ratio: 677 / 369;
+  background: url('assets/hand_pointer.png') no-repeat center/contain;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,.6));
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: left 0.4s, top 0.4s, opacity 0.3s, transform 0.3s;
+}
+/* Debug: 给 body 加 class="debug-hand" 可显示手指元素的实际包围框 */
+body.debug-hand .hand { outline: 2px dashed rgba(255,0,0,0.9); background-color: rgba(255,0,0,0.15); }
+.hand.visible { opacity: 1; }
+.hand.swipe   { animation: handSwipe 1.6s ease-in-out infinite; }
+.hand.tap     { animation: handTap   1.2s ease-in-out infinite; }
+.hand.urgent  { transform: translate(-50%, -50%) scale(1.15); animation-duration: 0.8s !important; }
+
+@keyframes handSwipe {
+  0%,100% { transform: translate(-120%, -50%); }
+  50%     { transform: translate(20%, -50%); }
+}
+@keyframes handTap {
+  0%,100% { transform: translate(-50%, -50%) scale(1); }
+  40%     { transform: translate(-50%, -50%) scale(0.85); }
+}
+.hand.urgent.swipe { animation: handSwipeFast 0.9s ease-in-out infinite; }
+.hand.urgent.tap   { animation: handTapFast   0.6s ease-in-out infinite; }
+@keyframes handSwipeFast {
+  0%,100% { transform: translate(-120%, -50%) scale(1.15); }
+  50%     { transform: translate(20%, -50%) scale(1.15); }
+}
+@keyframes handTapFast {
+  0%,100% { transform: translate(-50%, -50%) scale(1.15); }
+  40%     { transform: translate(-50%, -50%) scale(0.95); }
+}
+
+/* ============ Video layer ============ */
+.video-layer.visible { display: block; }
+.video-layer video {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+/* ============ End Card ============ */
+.endcard-layer.visible { display: flex; }
+.endcard-layer {
+  flex-direction: column; justify-content: center; align-items: center;
+  padding: 10% 5%;
+  animation: fadeIn 0.5s;
+}
+.endcard-logo { font-size: min(9vw, 48px); font-weight: 900; letter-spacing: 3px; margin-bottom: 20px; background: linear-gradient(90deg, #FFD661, #FF4D7A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.endcard-sub  { font-size: min(4vw, 18px); color: #ddd; margin-bottom: 40px; text-align: center; }
+.cta-button {
+  padding: 18px 48px;
+  background: linear-gradient(180deg, #FCD34D, #F59E0B);
+  color: #3B0764; font-weight: 900; font-size: min(5vw, 22px);
+  border: 3px solid #fff; border-radius: 40px;
+  box-shadow: 0 0 30px rgba(252,211,77,.6);
+  cursor: pointer;
+  animation: ctaBreath 1.2s ease-in-out infinite;
+}
+@keyframes ctaBreath {
+  0%,100% { transform: scale(1); box-shadow: 0 0 30px rgba(252,211,77,.6); }
+  50%     { transform: scale(1.05); box-shadow: 0 0 50px rgba(252,211,77,.9); }
+}
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+/* ============ Intro hint ============ */
+.intro-hint {
+  position: absolute; top: 6%; left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 28px;
+  font-size: min(5.5vw, 26px); font-weight: 900;
+  color: #FFD661;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 10px rgba(0,0,0,.9), 0 0 20px rgba(255,214,97,.6);
+  background: linear-gradient(180deg, rgba(0,0,0,.5), rgba(0,0,0,.25));
+  border: 2px solid rgba(255,214,97,.7);
+  border-radius: 40px;
+  box-shadow: 0 0 20px rgba(255,214,97,.4), inset 0 0 15px rgba(255,214,97,.2);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+.intro-hint.visible { opacity: 1; animation: hintPulse 1.4s ease-in-out infinite; }
+@keyframes hintPulse {
+  0%,100% { transform: translateX(-50%) scale(1);   box-shadow: 0 0 20px rgba(255,214,97,.4), inset 0 0 15px rgba(255,214,97,.2); }
+  50%     { transform: translateX(-50%) scale(1.05); box-shadow: 0 0 35px rgba(255,214,97,.8), inset 0 0 25px rgba(255,214,97,.4); }
+}
+
+/* ============ Hero nav arrows ============ */
+.nav-arrow {
+  position: absolute; top: 42%;
+  width: 54px; height: 54px;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,.55);
+  border: 2px solid rgba(255,255,255,.5);
+  border-radius: 50%;
+  color: #fff;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 28px; font-weight: 900;
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.15s, background 0.15s;
+  box-shadow: 0 4px 12px rgba(0,0,0,.5);
+}
+.nav-arrow.visible { opacity: 0.9; pointer-events: auto; }
+.nav-arrow:hover   { background: rgba(0,0,0,.8); }
+.nav-arrow:active  { transform: translateY(-50%) scale(0.9); }
+.nav-arrow.left    { left: 4%; }
+.nav-arrow.right   { right: 4%; }
+
+/* ============ Hero dots ============ */
+.hero-dots {
+  position: absolute; bottom: 19%; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 10px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 2;
+}
+.hero-dots.visible { opacity: 1; }
+.hero-dot {
+  width: 10px; height: 10px;
+  background: rgba(255,255,255,.4);
+  border-radius: 50%;
+  transition: background 0.25s, transform 0.25s;
+}
+.hero-dot.active {
+  background: #FFD661;
+  transform: scale(1.4);
+  box-shadow: 0 0 10px rgba(255,214,97,.8);
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- Preloader -->
+  <div class="layer preloader" id="preloader">
+    <div class="label">LOADING</div>
+    <div class="bar"><div class="bar-inner" id="progressBar"></div></div>
+    <div class="pct" id="progressPct">0%</div>
+  </div>
+
+  <!-- BG -->
+  <div class="layer bg-layer"></div>
+
+  <!-- Hero layer (3 heroes in horizontal track) -->
+  <div class="layer hero-layer interactive" id="heroLayer">
+    <div class="hero-track" id="heroTrack">
+      <div class="hero-slot" data-id="A" style="--accent:#6FC3FF">
+        <img class="hero-outline" src="assets/hero_A_idle.png" alt="">
+        <img class="hero-img"     src="assets/hero_A_idle.png" alt="Frost">
+      </div>
+      <div class="hero-slot" data-id="B" style="--accent:#FF4D7A">
+        <img class="hero-outline" src="assets/hero_B_idle.png" alt="">
+        <img class="hero-img"     src="assets/hero_B_idle.png" alt="Rose">
+      </div>
+      <div class="hero-slot" data-id="C" style="--accent:#FFD661">
+        <img class="hero-outline" src="assets/hero_C_idle.png" alt="">
+        <img class="hero-img"     src="assets/hero_C_idle.png" alt="Aurora">
+      </div>
+    </div>
+    <div class="nav-arrow left"  id="navLeft">‹</div>
+    <div class="nav-arrow right" id="navRight">›</div>
+    <div class="hero-dots" id="heroDots">
+      <div class="hero-dot active"></div>
+      <div class="hero-dot"></div>
+      <div class="hero-dot"></div>
+    </div>
+  </div>
+
+  <!-- FG hands -->
+  <div class="layer fg-layer">
+    <img src="assets/fg_hands.png" alt="">
+  </div>
+
+  <!-- UI layer -->
+  <div class="layer ui-layer" id="uiLayer">
+    <div class="intro-hint" id="introHint">SWIPE TO CHOOSE</div>
+
+    <div class="stat-panels" id="statPanels">
+      <div class="stat-panel" data-pos="tl" data-key="looks">
+        <div class="label">Looks</div>
+        <div class="value">--</div>
+        <div class="tag"></div>
+      </div>
+      <div class="stat-panel" data-pos="tr" data-key="skill">
+        <div class="label">Skill</div>
+        <div class="value">--</div>
+        <div class="tag"></div>
+      </div>
+      <div class="stat-panel" data-pos="br" data-key="growth">
+        <div class="label">Growth</div>
+        <div class="value">--</div>
+        <div class="tag"></div>
+      </div>
+    </div>
+
+    <div class="elite-banner" id="eliteBanner"></div>
+
+    <div class="speech-bubble" id="speechBubble"></div>
+
+    <div class="action-buttons" id="actionPrimary">
+      <img class="abtn" data-btn="talk"     src="assets/btn_talk.png" alt="Talk">
+      <img class="abtn" data-btn="appraise" src="assets/btn_appraise.png" alt="Appraise">
+    </div>
+    <div class="action-buttons" id="actionSecondary">
+      <img class="abtn"      data-btn="dismiss" src="assets/btn_dismiss.png" alt="Dismiss">
+      <img class="abtn main" data-btn="recruit" src="assets/btn_recruit.png" alt="Recruit">
+    </div>
+  </div>
+
+  <!-- VFX layer -->
+  <div class="layer vfx-layer" id="vfxLayer">
+    <div class="vignette" id="vignette"></div>
+    <div class="scanline" id="scanline"></div>
+    <div class="shockwave" id="shockwave"></div>
+    <div class="particles" id="particles"></div>
+  </div>
+
+  <!-- Tutorial hand -->
+  <div class="layer tutorial-layer">
+    <div class="hand" id="hand"></div>
+  </div>
+
+  <!-- Recruit video -->
+  <div class="layer video-layer" id="videoLayer">
+    <video id="recruitVideo" muted playsinline preload="auto"></video>
+  </div>
+
+  <!-- End card -->
+  <div class="layer endcard-layer" id="endcardLayer">
+    <div class="endcard-logo">RECRUIT HEROES</div>
+    <div class="endcard-sub">You unlocked an <b>ELITE</b> recruit!<br>Build your dream team now.</div>
+    <div class="cta-button" id="ctaBtn">PLAY NOW</div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+// ============ Config ============
+const CONFIG = {
+  IDLE_TIMEOUT_MS: 3000,
+  SCAN_DURATION_MS: 600,
+  STATS_REVEAL_INTERVAL_MS: 180,
+  RATING_DROP_DURATION_MS: 900,
+  RECRUIT_VIDEO_DURATION_MS: 3800,
+  END_CARD_DELAY_MS: 300,
+  SWIPE_THRESHOLD_PX: 25,
+  CTA_URL: '#',
+};
+
+const ASSET_DIR = 'assets/';
+
+const HEROES = [
+  { id: 'A', name: 'Frost',  accent: '#6FC3FF',
+    talk: `"Don't waste my time. I only follow the strong."`,
+    stats: { looks: 88, skill: 96, growth: 90 },
+    video: ASSET_DIR + 'hero_A_recruit.mp4' },
+  { id: 'B', name: 'Rose',   accent: '#FF4D7A',
+    talk: `"Oh, recruiting me? Bold choice. I like it."`,
+    stats: { looks: 96, skill: 92, growth: 88 },
+    video: ASSET_DIR + 'hero_B_recruit.mp4' },
+  { id: 'C', name: 'Aurora', accent: '#FFD661',
+    talk: `"Hi! I'll do my best, please take care of me!"`,
+    stats: { looks: 90, skill: 88, growth: 96 },
+    video: ASSET_DIR + 'hero_C_recruit.mp4' },
+];
+
+// ============ DOM refs ============
+const $ = (sel) => document.querySelector(sel);
+const heroLayer   = $('#heroLayer');
+const heroTrack   = $('#heroTrack');
+const heroSlots   = document.querySelectorAll('.hero-slot');
+const introHint   = $('#introHint');
+const actionPrimary   = $('#actionPrimary');
+const actionSecondary = $('#actionSecondary');
+const statPanels  = document.querySelectorAll('.stat-panel');
+const eliteBanner = $('#eliteBanner');
+const speechBubble= $('#speechBubble');
+const scanline    = $('#scanline');
+const shockwave   = $('#shockwave');
+const particles   = $('#particles');
+const vignette    = $('#vignette');
+const hand        = $('#hand');
+const videoLayer  = $('#videoLayer');
+const recruitVideo= $('#recruitVideo');
+const endcardLayer= $('#endcardLayer');
+const ctaBtn      = $('#ctaBtn');
+const navLeft     = $('#navLeft');
+const navRight    = $('#navRight');
+const heroDots    = $('#heroDots');
+
+// ============ State ============
+let currentHeroIdx = 0;
+let currentState = 'INTRO';
+let idleTimer = null;
+
+// ============ Preload ============
+const ASSET_URLS = [
+  'bg_recruitment.png','fg_hands.png',
+  'hero_A_idle.png','hero_B_idle.png','hero_C_idle.png',
+  'hero_A_recruit.mp4','hero_B_recruit.mp4','hero_C_recruit.mp4',
+  'btn_talk.png','btn_appraise.png','btn_recruit.png','btn_dismiss.png',
+  'panel_stat.png','tag_ssr_plus.png','banner_elite.png','hand_pointer.png',
+  'vfx_scanline.png','vfx_shockwave.png','vfx_particle_gold.png','vfx_vignette.png',
+].map(f => ASSET_DIR + f);
+
+function preload(urls, onProgress) {
+  let done = 0;
+  const total = urls.length;
+  return Promise.all(urls.map(url => new Promise(resolve => {
+    const isVideo = url.endsWith('.mp4');
+    const finish = () => { done++; onProgress(done / total); resolve(); };
+    if (isVideo) {
+      const v = document.createElement('video');
+      v.preload = 'auto'; v.muted = true; v.playsInline = true;
+      v.oncanplaythrough = finish;
+      v.onerror = finish;
+      v.src = url;
+      v.load();
+      // fallback: some browsers won't fire canplaythrough, resolve after 5s
+      setTimeout(finish, 5000);
+    } else {
+      const img = new Image();
+      img.onload = finish;
+      img.onerror = finish;
+      img.src = url;
+    }
+  })));
+}
+
+(function init() {
+  const progressBar = $('#progressBar');
+  const progressPct = $('#progressPct');
+  preload(ASSET_URLS, (p) => {
+    progressBar.style.width = (p * 100).toFixed(0) + '%';
+    progressPct.textContent = Math.floor(p * 100) + '%';
+  }).then(() => {
+    setTimeout(() => {
+      $('#preloader').style.display = 'none';
+      startIntro();
+    }, 300);
+  });
+})();
+
+// ============ Particle spawner ============
+function spawnParticles() {
+  particles.innerHTML = '';
+  particles.classList.add('active');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = (Math.random() * 3) + 's';
+    p.style.animationDuration = (2 + Math.random() * 2) + 's';
+    particles.appendChild(p);
+  }
+}
+function stopParticles() {
+  particles.classList.remove('active');
+  particles.innerHTML = '';
+}
+
+// ============ Hand guidance ============
+function moveHandTo(xPercent, yPercent, mode) {
+  hand.style.left = xPercent + '%';
+  hand.style.top  = yPercent + '%';
+  hand.className = 'hand visible ' + (mode || 'tap');
+}
+function hideHand() {
+  hand.classList.remove('visible', 'urgent', 'swipe', 'tap');
+}
+function markHandUrgent() {
+  hand.classList.add('urgent');
+}
+
+// ============ Idle detection ============
+function resetIdle() {
+  hand.classList.remove('urgent');
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(markHandUrgent, CONFIG.IDLE_TIMEOUT_MS);
+}
+function stopIdle() {
+  clearTimeout(idleTimer);
+  hand.classList.remove('urgent');
+}
+
+document.addEventListener('pointerdown', resetIdle, true);
+
+// ============ Hero track swipe ============
+let dragStartX = 0, dragCurrentX = 0, isDragging = false, dragTapStart = 0;
+
+heroLayer.addEventListener('pointerdown', (e) => {
+  if (currentState !== 'SELECTION') return;
+  if (e.target.closest('.nav-arrow, .hero-dot')) return; // skip arrow/dot clicks
+  isDragging = true;
+  dragStartX = dragCurrentX = e.clientX;
+  dragTapStart = Date.now();
+  heroTrack.style.transition = 'none';
+});
+heroLayer.addEventListener('pointermove', (e) => {
+  if (!isDragging) return;
+  dragCurrentX = e.clientX;
+  const dx = dragCurrentX - dragStartX;
+  const stageWidth = heroLayer.clientWidth;
+  const base = -currentHeroIdx * 33.3333;
+  const drag = (dx / stageWidth) * 33.3333;
+  heroTrack.style.transform = `translateX(${base + drag}%)`;
+});
+heroLayer.addEventListener('pointerup', (e) => {
+  if (!isDragging) return;
+  isDragging = false;
+  heroTrack.style.transition = '';
+  const dx = dragCurrentX - dragStartX;
+  const dt = Date.now() - dragTapStart;
+
+  if (Math.abs(dx) < 10 && dt < 300) {
+    // Tap: enter ActionChoice
+    enterActionChoice();
+  } else if (dx > CONFIG.SWIPE_THRESHOLD_PX) {
+    goToHero(currentHeroIdx - 1);
+  } else if (dx < -CONFIG.SWIPE_THRESHOLD_PX) {
+    goToHero(currentHeroIdx + 1);
+  } else {
+    goToHero(currentHeroIdx); // snap back
+  }
+});
+heroLayer.addEventListener('pointercancel', () => {
+  if (!isDragging) return;
+  isDragging = false;
+  heroTrack.style.transition = '';
+  goToHero(currentHeroIdx);
+});
+
+function goToHero(idx) {
+  idx = ((idx % HEROES.length) + HEROES.length) % HEROES.length;
+  currentHeroIdx = idx;
+  heroTrack.style.transform = `translateX(${-idx * 33.3333}%)`;
+  heroSlots.forEach((slot, i) => slot.classList.toggle('active', i === idx));
+  // sync dots
+  heroDots.querySelectorAll('.hero-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+}
+
+// Arrow buttons
+navLeft.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (currentState !== 'SELECTION') return;
+  resetIdle();
+  goToHero(currentHeroIdx - 1);
+});
+navRight.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (currentState !== 'SELECTION') return;
+  resetIdle();
+  goToHero(currentHeroIdx + 1);
+});
+
+// Dots click
+heroDots.querySelectorAll('.hero-dot').forEach((dot, i) => {
+  dot.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (currentState !== 'SELECTION') return;
+    resetIdle();
+    goToHero(i);
+  });
+});
+
+// ============ State machine ============
+
+// State: INTRO → 0.5s auto → SELECTION
+function startIntro() {
+  currentState = 'INTRO';
+  introHint.classList.add('visible');
+  setTimeout(enterSelection, 700);
+}
+
+// State: SELECTION — swipe to pick, tap to confirm
+function enterSelection() {
+  currentState = 'SELECTION';
+  goToHero(currentHeroIdx);
+  navLeft.classList.add('visible');
+  navRight.classList.add('visible');
+  heroDots.classList.add('visible');
+  // keep intro hint visible during SELECTION so user knows to swipe
+  introHint.classList.add('visible');
+  // hand at center of stage, swipe motion
+  moveHandTo(50, 62, 'swipe');
+  resetIdle();
+}
+function exitSelection() {
+  hideHand();
+  introHint.classList.remove('visible');
+  navLeft.classList.remove('visible');
+  navRight.classList.remove('visible');
+  heroDots.classList.remove('visible');
+  stopIdle();
+}
+
+// State: ACTION_CHOICE — Talk / Appraise
+function enterActionChoice() {
+  if (currentState === 'ACTION_CHOICE') return;
+  exitSelection();
+  currentState = 'ACTION_CHOICE';
+  actionPrimary.classList.add('visible');
+  // hand on Appraise (right button), slightly above so fingertip points down at button
+  moveHandTo(68, 67, 'tap');
+  resetIdle();
+}
+function exitActionChoice() {
+  actionPrimary.classList.remove('visible');
+  hideHand();
+  stopIdle();
+}
+
+actionPrimary.addEventListener('click', (e) => {
+  const btn = e.target.closest('.abtn');
+  if (!btn) return;
+  resetIdle();
+  const type = btn.dataset.btn;
+  if (type === 'talk') {
+    playTalk();
+  } else if (type === 'appraise') {
+    exitActionChoice();
+    enterAppraisal();
+  }
+});
+
+function playTalk() {
+  const hero = HEROES[currentHeroIdx];
+  speechBubble.textContent = hero.talk;
+  speechBubble.classList.add('visible');
+  setTimeout(() => {
+    speechBubble.classList.remove('visible');
+    // re-strengthen hand on Appraise
+    hand.classList.add('urgent');
+  }, 1800);
+}
+
+// State: APPRAISAL — scan → stats → ELITE → Recruit/Dismiss buttons
+function enterAppraisal() {
+  currentState = 'APPRAISAL';
+
+  // 1) Scan
+  scanline.classList.remove('active'); void scanline.offsetWidth;
+  scanline.classList.add('active');
+
+  // 2) Stats reveal after scan finishes
+  setTimeout(() => {
+    const hero = HEROES[currentHeroIdx];
+    const order = ['tl', 'tr', 'br']; // reveal order
+    const keys = ['looks','skill','growth'];
+
+    order.forEach((pos, i) => {
+      const panel = document.querySelector(`.stat-panel[data-pos="${pos}"]`);
+      const key = panel.dataset.key;
+      panel.querySelector('.value').textContent = hero.stats[key];
+      setTimeout(() => {
+        panel.classList.remove('visible'); void panel.offsetWidth;
+        panel.classList.add('visible');
+      }, i * CONFIG.STATS_REVEAL_INTERVAL_MS);
+    });
+
+    // 3) ELITE drop
+    setTimeout(() => {
+      eliteBanner.classList.remove('drop'); void eliteBanner.offsetWidth;
+      eliteBanner.classList.add('drop');
+      shockwave.classList.remove('active'); void shockwave.offsetWidth;
+      shockwave.classList.add('active');
+
+      // 4) Show Recruit/Dismiss buttons
+      setTimeout(() => {
+        actionSecondary.classList.add('visible');
+        moveHandTo(70, 73, 'tap'); // on Recruit (right button, main)
+        resetIdle();
+      }, CONFIG.RATING_DROP_DURATION_MS);
+    }, order.length * CONFIG.STATS_REVEAL_INTERVAL_MS + 200);
+  }, CONFIG.SCAN_DURATION_MS);
+}
+
+actionSecondary.addEventListener('click', (e) => {
+  const btn = e.target.closest('.abtn');
+  if (!btn) return;
+  resetIdle();
+  const type = btn.dataset.btn;
+  if (type === 'recruit') {
+    enterRecruit();
+  } else if (type === 'dismiss') {
+    // Not a real dismiss — re-guide to Recruit
+    hand.classList.add('urgent');
+  }
+});
+
+// State: RECRUIT — fade out UI, play video
+function enterRecruit() {
+  currentState = 'RECRUIT';
+  stopIdle();
+  hideHand();
+
+  // Fade out UI elements
+  actionSecondary.classList.remove('visible');
+  statPanels.forEach(p => p.classList.remove('visible'));
+  eliteBanner.classList.remove('drop');
+  eliteBanner.style.opacity = '0';
+  shockwave.classList.remove('active');
+
+  // Particles + vignette
+  setTimeout(() => {
+    spawnParticles();
+    vignette.classList.add('active');
+  }, 200);
+
+  // Play video
+  const hero = HEROES[currentHeroIdx];
+  recruitVideo.src = hero.video;
+  videoLayer.classList.add('visible');
+  const playPromise = recruitVideo.play();
+  if (playPromise) {
+    playPromise.catch(err => console.warn('video autoplay blocked', err));
+  }
+
+  // Fallback timer + ended event
+  let ended = false;
+  const toEnd = () => { if (ended) return; ended = true; enterEndCard(); };
+  recruitVideo.onended = toEnd;
+  setTimeout(toEnd, CONFIG.RECRUIT_VIDEO_DURATION_MS + 1000);
+}
+
+// State: END_CARD
+function enterEndCard() {
+  currentState = 'END_CARD';
+  setTimeout(() => {
+    videoLayer.classList.remove('visible');
+    recruitVideo.pause();
+    stopParticles();
+    vignette.classList.remove('active');
+    endcardLayer.classList.add('visible');
+  }, CONFIG.END_CARD_DELAY_MS);
+}
+
+ctaBtn.addEventListener('click', () => {
+  if (CONFIG.CTA_URL && CONFIG.CTA_URL !== '#') {
+    window.open(CONFIG.CTA_URL, '_blank');
+  } else {
+    alert('CTA clicked — Play Now');
+  }
+});
+
+// Prevent context menu & zoom
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('gesturestart', e => e.preventDefault());
+</script>
+</body>
+</html>

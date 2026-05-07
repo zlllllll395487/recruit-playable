@@ -1,0 +1,14 @@
+# Claude Code internals
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+
+# Node (if later added)
+node_modules/
