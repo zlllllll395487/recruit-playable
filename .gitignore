@@ -1,6 +1,9 @@
 # Claude Code internals
 .claude/
 
+# Raw source assets (not used in production, kept for future iterations)
+_raw_sources/
+
 # OS
 .DS_Store
 Thumbs.db
