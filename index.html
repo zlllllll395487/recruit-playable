@@ -29,7 +29,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 .ui-layer      { z-index: 3; }
 .vfx-layer     { z-index: 4; pointer-events: none; }
 .tutorial-layer{ z-index: 5; pointer-events: none; }
-.video-layer   { z-index: 6; display: none; background: #000; }
+.video-layer   { z-index: 6; background: #000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease; pointer-events: none; }
 .endcard-layer { z-index: 7; display: none; background: rgba(0,0,0,.9); }
 .preloader     { z-index: 100; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
@@ -108,6 +108,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
   padding: 0 22% 0 8%;
   opacity: 0; transform: scale(0);
   filter: drop-shadow(0 4px 10px rgba(0,0,0,.5));
+  transition: opacity 0.35s ease, transform 0.35s ease;  /* 退出时可平滑淡出 */
 }
 .stat-panel.visible { animation: statPop 0.4s cubic-bezier(.34,1.56,.64,1) forwards; }
 .stat-panel .label { font-size: min(2.2vw, 11px); color: #E9D5FF; letter-spacing: 1px; text-transform: uppercase; line-height: 1.1; text-align: center; }
@@ -135,6 +136,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
   background: url('assets/banner_elite.png') no-repeat center/contain;
   opacity: 0;
   filter: drop-shadow(0 0 30px rgba(255,215,0,.8));
+  transition: opacity 0.35s ease;   /* 退出时淡出 */
 }
 .elite-banner.drop {
   animation: eliteDrop 0.5s cubic-bezier(.4,1.8,.6,1) forwards,
@@ -154,23 +156,60 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
 
 /* ============ Speech bubble (Talk path) ============ */
 .speech-bubble {
-  position: absolute; top: 14%; left: 50%;
+  position: absolute; top: 10%; left: 50%;
   transform: translateX(-50%) scale(0);
-  max-width: 70%; padding: 16px 22px;
-  background: rgba(255,255,255,.95); color: #222;
-  border-radius: 20px;
-  font-size: min(3.6vw, 16px); font-weight: 500;
-  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  max-width: 74%; min-width: 50%;
+  padding: 20px 28px 18px;
+  background:
+    radial-gradient(ellipse at center top,
+      rgba(91, 33, 168, 0.35) 0%,
+      transparent 65%),
+    linear-gradient(180deg,
+      rgba(43, 23, 74, 0.94) 0%,
+      rgba(20, 10, 35, 0.97) 100%);
+  border: 1.5px solid rgba(255, 214, 97, 0.75);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 214, 97, 0.18),
+    inset 0 20px 30px -20px rgba(255, 214, 97, 0.28),
+    0 0 28px rgba(168, 85, 247, 0.4),
+    0 10px 24px rgba(0, 0, 0, 0.75);
+  font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  font-size: min(3.8vw, 17px);
+  font-weight: 500;
+  font-style: italic;
+  color: #F5E1A4;
+  letter-spacing: 0.4px;
+  line-height: 1.45;
   text-align: center;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
   opacity: 0;
 }
-.speech-bubble::after {
-  content: ''; position: absolute; bottom: -10px; left: 50%;
+/* 顶部装饰 — 金色菱形中心点 */
+.speech-bubble::before {
+  content: '◆';
+  position: absolute;
+  top: -9px; left: 50%;
   transform: translateX(-50%);
-  border: 10px solid transparent; border-top-color: rgba(255,255,255,.95);
+  color: #FFD661;
+  background: linear-gradient(180deg, rgba(20, 10, 35, 0.98), rgba(43, 23, 74, 0.94));
+  padding: 0 10px;
+  font-size: 11px;
+  text-shadow: 0 0 6px rgba(255, 214, 97, 0.9);
+}
+/* 底部小尖 — 指向角色 */
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -7px; left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px; height: 12px;
+  background: rgba(20, 10, 35, 0.97);
+  border-right: 1.5px solid rgba(255, 214, 97, 0.75);
+  border-bottom: 1.5px solid rgba(255, 214, 97, 0.75);
 }
 .speech-bubble.visible {
-  animation: bubbleIn 0.3s cubic-bezier(.34,1.56,.64,1) forwards;
+  animation: bubbleIn 0.35s cubic-bezier(.34,1.56,.64,1) forwards;
 }
 @keyframes bubbleIn {
   from { transform: translateX(-50%) scale(0); opacity: 0; }
@@ -231,10 +270,15 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; font
   100% { transform: translateY(-120vh) scale(1.2); opacity: 0; }
 }
 
-/* ============ VFX: vignette (recruit stage) ============ */
+/* ============ VFX: vignette (recruit stage) — CSS radial-gradient，不用图 ============ */
 .vignette {
   position: absolute; inset: 0;
-  background: url('assets/vfx_vignette.png') no-repeat center/cover;
+  background: radial-gradient(ellipse at center,
+    transparent 0%,
+    transparent 35%,
+    rgba(252, 211, 77, 0.12) 60%,
+    rgba(245, 158, 11, 0.28) 85%,
+    rgba(180, 83, 9, 0.45) 100%);
   opacity: 0;
   pointer-events: none;
   mix-blend-mode: screen;
@@ -280,11 +324,33 @@ body.debug-hand .hand { outline: 2px dashed rgba(255,0,0,0.9); background-color:
 }
 
 /* ============ Video layer ============ */
-.video-layer.visible { display: block; }
+.video-layer.visible { opacity: 1; visibility: visible; pointer-events: auto; }
 .video-layer video {
   width: 100%; height: 100%;
   object-fit: cover;
   background: #000;
+}
+
+/* ============ Golden flash (招募过渡闪光) ============ */
+.flash {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at center,
+    rgba(255, 245, 204, 0.95) 0%,
+    rgba(255, 214, 97, 0.75) 25%,
+    rgba(245, 158, 11, 0.35) 60%,
+    transparent 100%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  mix-blend-mode: screen;
+}
+.flash.active {
+  animation: goldenFlash 0.8s ease-out forwards;
+}
+@keyframes goldenFlash {
+  0%   { opacity: 0; }
+  35%  { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 /* ============ End Card ============ */
@@ -476,6 +542,9 @@ body.debug-hand .hand { outline: 2px dashed rgba(255,0,0,0.9); background-color:
     <div class="hand" id="hand"></div>
   </div>
 
+  <!-- Golden flash (招募过渡闪光) -->
+  <div class="flash" id="flash"></div>
+
   <!-- Recruit video -->
   <div class="layer video-layer" id="videoLayer">
     <video id="recruitVideo" muted playsinline preload="auto"></video>
@@ -551,52 +620,77 @@ let currentHeroIdx = 0;
 let currentState = 'INTRO';
 let idleTimer = null;
 
-// ============ Preload ============
-const ASSET_URLS = [
-  'bg_recruitment.png','fg_hands.png',
-  'hero_A_idle.png','hero_B_idle.png','hero_C_idle.png',
-  'hero_A_recruit.mp4','hero_B_recruit.mp4','hero_C_recruit.mp4',
-  'btn_talk.png','btn_appraise.png','btn_recruit.png','btn_dismiss.png',
-  'panel_stat.png','tag_ssr_plus.png','banner_elite.png','hand_pointer.png',
-  'vfx_scanline.png','vfx_shockwave.png','vfx_particle_gold.png','vfx_vignette.png',
-].map(f => ASSET_DIR + f);
+// ============ Layered Preload ============
+// 核心策略：按"进入交互所需"分层加载，视频完全延迟到 APPRAISAL 阶段
+// 旧逻辑：等全部 19 文件（含 2MB 视频）下完 → 首屏 15s
+// 新逻辑：P1+P2+P3 ~1MB 下完即可交互，视频延迟到进入鉴定时才拉 → 首屏 1-2s
+const ASSET_LAYERS = {
+  P1_CRITICAL:     ['bg_recruitment.png'],                                   // 背景（首帧可见的一瞬）
+  P2_FIRST_SCREEN: ['hero_A_idle.png', 'fg_hands.png'],                      // 完整第一屏
+  P3_INTERACTIVE:  ['btn_talk.png', 'btn_appraise.png', 'hand_pointer.png'], // 阶段二可交互
+  P4_BACKGROUND:   [                                                         // 异步加载，不阻塞
+    'hero_B_idle.png', 'hero_C_idle.png',
+    'btn_recruit.png', 'btn_dismiss.png',
+    'panel_stat.png', 'tag_ssr_plus.png', 'banner_elite.png',
+    'vfx_scanline.png', 'vfx_shockwave.png', 'vfx_particle_gold.png',
+  ],
+  // 视频在 enterAppraisal() 时按 currentHeroIdx 按需加载
+};
 
-function preload(urls, onProgress) {
+function preloadImages(urls, onProgress) {
+  if (urls.length === 0) return Promise.resolve();
   let done = 0;
   const total = urls.length;
   return Promise.all(urls.map(url => new Promise(resolve => {
-    const isVideo = url.endsWith('.mp4');
-    const finish = () => { done++; onProgress(done / total); resolve(); };
-    if (isVideo) {
-      const v = document.createElement('video');
-      v.preload = 'auto'; v.muted = true; v.playsInline = true;
-      v.oncanplaythrough = finish;
-      v.onerror = finish;
-      v.src = url;
-      v.load();
-      // fallback: some browsers won't fire canplaythrough, resolve after 5s
-      setTimeout(finish, 5000);
-    } else {
-      const img = new Image();
-      img.onload = finish;
-      img.onerror = finish;
-      img.src = url;
-    }
+    const img = new Image();
+    const finish = () => { done++; if (onProgress) onProgress(done / total); resolve(); };
+    img.onload = finish;
+    img.onerror = finish;
+    img.src = url;
   })));
 }
 
-(function init() {
+// 视频预加载（在 enterAppraisal 里调用，为当前英雄预热视频）
+const videoPreloadCache = {};
+function preloadVideoForCurrentHero() {
+  const hero = HEROES[currentHeroIdx];
+  if (videoPreloadCache[hero.id]) return;
+  const v = document.createElement('video');
+  v.preload = 'auto';
+  v.muted = true; v.playsInline = true;
+  v.src = hero.video;
+  v.load();
+  videoPreloadCache[hero.id] = v;
+}
+
+(async function init() {
   const progressBar = $('#progressBar');
   const progressPct = $('#progressPct');
-  preload(ASSET_URLS, (p) => {
-    progressBar.style.width = (p * 100).toFixed(0) + '%';
-    progressPct.textContent = Math.floor(p * 100) + '%';
-  }).then(() => {
-    setTimeout(() => {
-      $('#preloader').style.display = 'none';
-      startIntro();
-    }, 300);
-  });
+  const preloader   = $('#preloader');
+
+  // 进度条权重：P1 占 40%（bg 最大），P2 占 35%（hero+fg），P3 占 25%（小 UI）
+  const mapProgress = (startPct, endPct) => (local) => {
+    const pct = startPct + local * (endPct - startPct);
+    progressBar.style.width = (pct * 100).toFixed(1) + '%';
+    progressPct.textContent = Math.floor(pct * 100) + '%';
+  };
+
+  const prefix = (files) => files.map(f => ASSET_DIR + f);
+
+  // Phase 1 (0% → 40%)：关键背景，过后场景能显示
+  await preloadImages(prefix(ASSET_LAYERS.P1_CRITICAL), mapProgress(0, 0.40));
+  // Phase 2 (40% → 75%)：主角 + 手部前景，过后完整第一屏
+  await preloadImages(prefix(ASSET_LAYERS.P2_FIRST_SCREEN), mapProgress(0.40, 0.75));
+  // Phase 3 (75% → 100%)：交互素材，过后可进入 SELECTION
+  await preloadImages(prefix(ASSET_LAYERS.P3_INTERACTIVE), mapProgress(0.75, 1.0));
+
+  // 关键资源就绪 —— 淡出 preloader 进入 INTRO
+  preloader.style.transition = 'opacity 0.4s';
+  preloader.style.opacity = '0';
+  setTimeout(() => { preloader.style.display = 'none'; startIntro(); }, 300);
+
+  // Phase 4（后台静默加载，不阻塞用户交互，无进度显示）
+  preloadImages(prefix(ASSET_LAYERS.P4_BACKGROUND));
 })();
 
 // ============ Particle spawner ============
@@ -796,6 +890,9 @@ function playTalk() {
 function enterAppraisal() {
   currentState = 'APPRAISAL';
 
+  // 用户已确定选哪个英雄 → 开始后台预热对应视频（在动画播放的 ~2 秒里偷偷加载）
+  preloadVideoForCurrentHero();
+
   // 1) Scan
   scanline.classList.remove('active'); void scanline.offsetWidth;
   scanline.classList.add('active');
@@ -852,27 +949,35 @@ function enterRecruit() {
   stopIdle();
   hideHand();
 
-  // Fade out UI elements
+  // === 时序化过渡（总 ~700ms）===
+  // T0 (0ms)    同时触发：UI 淡出 + 金色闪光
+  // T350ms      UI 已不可见 + 闪光峰值 → 开始拉起视频
+  // T700ms      闪光消退 + 视频 crossfade 完成
+
+  // T0：UI 开始淡出（CSS transition 会让它平滑消失）
   actionSecondary.classList.remove('visible');
   statPanels.forEach(p => p.classList.remove('visible'));
   eliteBanner.classList.remove('drop');
   eliteBanner.style.opacity = '0';
   shockwave.classList.remove('active');
 
-  // Particles + vignette
+  // T0：金色闪光过场
+  const flash = $('#flash');
+  flash.classList.remove('active'); void flash.offsetWidth;  // reset
+  flash.classList.add('active');
+
+  // T350ms：UI 已基本消失 → 启动视频（配合 opacity 过渡淡入）
   setTimeout(() => {
+    const hero = HEROES[currentHeroIdx];
+    recruitVideo.src = hero.video;
+    videoLayer.classList.add('visible');   // opacity 0 → 1 由 CSS transition 完成
+    const playPromise = recruitVideo.play();
+    if (playPromise) playPromise.catch(err => console.warn('video autoplay blocked', err));
+
+    // 同步启动背景氛围（粒子 + vignette 在视频已淡入时登场）
     spawnParticles();
     vignette.classList.add('active');
-  }, 200);
-
-  // Play video
-  const hero = HEROES[currentHeroIdx];
-  recruitVideo.src = hero.video;
-  videoLayer.classList.add('visible');
-  const playPromise = recruitVideo.play();
-  if (playPromise) {
-    playPromise.catch(err => console.warn('video autoplay blocked', err));
-  }
+  }, 350);
 
   // Fallback timer + ended event
   let ended = false;
