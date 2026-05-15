@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35be3e8ef702c7f438a10529c4e21b9c, type: 3}
+  m_Name: GameConfig
+  m_EditorClassIdentifier: 
+  heroes:
+  - {fileID: 11400000, guid: 1a87977019eeb324fb84c30b4c65c8d8, type: 2}
+  - {fileID: 11400000, guid: 55f29c1230d716b4ab5b92a4be32db44, type: 2}
+  - {fileID: 11400000, guid: c757726b39218b84889d04251be3ebd7, type: 2}
+  introDuration: 0.7
+  scanDuration: 0.6
+  statRevealInterval: 0.18
+  ratingDropDuration: 0.9
+  recruitVideoDuration: 3.8
+  endCardDelay: 0.3
+  idleTimeoutSeconds: 3
+  swipeThreshold: 60
+  tapMaxMovement: 15
+  tapMaxDuration: 0.3
+  storeUrlIos: https://example.com/ios
+  storeUrlAndroid: https://example.com/android

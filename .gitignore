@@ -4,6 +4,9 @@
 # Raw source assets (not used in production, kept for future iterations)
 _raw_sources/
 
+# Build outputs
+dist/
+
 # OS
 .DS_Store
 Thumbs.db
@@ -15,3 +18,31 @@ desktop.ini
 
 # Node (if later added)
 node_modules/
+
+# Unity 临时/缓存目录（不可提交，重新打开 Unity 会自动重建）
+Playable0506/Library/
+Playable0506/Temp/
+Playable0506/Obj/
+Playable0506/Logs/
+Playable0506/UserSettings/
+Playable0506/Build/
+Playable0506/Builds/
+Playable0506/Assets/Screenshots/
+
+# Unity 自动生成的 IDE 文件
+Playable0506/*.csproj
+Playable0506/*.sln
+Playable0506/*.suo
+Playable0506/*.user
+Playable0506/*.unityproj
+Playable0506/*.userprefs
+Playable0506/*.pidb
+Playable0506/*.booproj
+
+# Unity meta 文件位于编译产物里
+Playable0506/Assembly-*.csproj.meta
+
+# 构建产物
+*.apk
+*.aab
+*.unitypackage
