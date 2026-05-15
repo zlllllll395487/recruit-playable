@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   heroId: A
   heroName: Frost
-  accentColor: {r: 0.43, g: 0.76, b: 1, a: 1}
+  accentColor: {r: 1, g: 0.84, b: 0.38, a: 1}
   idleSprite: {fileID: 21300000, guid: 0a03487b0bc24e849a974e1d6b280c7c, type: 3}
   recruitClip: {fileID: 32900000, guid: f5103eb116b525d4ea6153d97276ba51, type: 3}
   looks: 88

@@ -176,7 +176,23 @@ namespace RecruitPlayable.EditorTools {
                 slotRT.sizeDelta       = new Vector2(1080, 0);
                 slotRT.anchoredPosition = new Vector2(i * 1080, 0);
 
-                // Outline — 运行时由 HeroCarousel 覆盖 sprite / sizeDelta
+                // Halo — 英雄身后柔和径向光晕（带颜色，运行时由 HeroCarousel 染色）
+                var halo = CreateUI("HeroHalo_" + ids[i], slot.transform);
+                var haloRT = halo.GetComponent<RectTransform>();
+                haloRT.anchorMin       = new Vector2(0.5f, 0);
+                haloRT.anchorMax       = new Vector2(0.5f, 0);
+                haloRT.pivot           = new Vector2(0.5f, 0.5f);
+                haloRT.sizeDelta       = new Vector2(1300, 1300);
+                haloRT.anchoredPosition = new Vector2(0, 940); // 英雄中心约 540+400
+                var haloImg = halo.AddComponent<Image>();
+                haloImg.sprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/_Project/Art/halo_radial.png");
+                haloImg.preserveAspect = false;
+                haloImg.raycastTarget  = false;
+                haloImg.color = new Color(1f, 0.84f, 0.38f, 0.6f); // 默认金色，运行时按 accentColor 染
+
+                // Outline — 通过开关隔绝（与 HeroBreathe 摇摆冲突时关闭，避免重影）
+                // 把 enableOutlineGlow 改回 true 即可恢复金色描边 + 脉动
+                const bool enableOutlineGlow = true;
                 var outline = CreateUI("HeroOutline_" + ids[i], slot.transform);
                 var oRT     = outline.GetComponent<RectTransform>();
                 oRT.anchorMin       = new Vector2(0.5f, 0);
@@ -187,8 +203,12 @@ namespace RecruitPlayable.EditorTools {
                 var oImg = outline.AddComponent<Image>();
                 oImg.preserveAspect = false;
                 oImg.raycastTarget  = false;
-                oImg.color          = new Color(1f, 0.84f, 0.38f, 0.75f);
-                outline.AddComponent<HeroOutlinePulse>();
+                if (enableOutlineGlow) {
+                    oImg.color = new Color(1f, 0.84f, 0.38f, 0.75f);
+                    // 不再独立 HeroOutlinePulse — 改由 HeroBreathe.glowImage 引用同步呼吸
+                } else {
+                    oImg.color = new Color(1f, 0.84f, 0.38f, 0f); // 隐形（保留 GO 不破坏 HeroCarousel.heroOutlineImages 引用）
+                }
 
                 // Hero image — 放大 30%（823→1070, 610→793），下移到 y=540
                 var hero  = CreateUI("HeroImage_" + ids[i], slot.transform);
@@ -202,7 +222,13 @@ namespace RecruitPlayable.EditorTools {
                 hImg.sprite       = LoadSprite("hero_" + ids[i] + "_idle");
                 hImg.preserveAspect = true;
                 hImg.raycastTarget  = false;
-                hero.AddComponent<HeroBreathe>();
+                var breathe = hero.AddComponent<HeroBreathe>();
+                // 把 halo 光晕交给 HeroBreathe 同步：缩放和 alpha 用同一 sin 波形
+                if (enableOutlineGlow) {
+                    breathe.glowImage = haloImg;
+                    breathe.glowMinAlpha = 0.35f;
+                    breathe.glowMaxAlpha = 0.75f;
+                }
             }
 
             heroLayer.transform.SetSiblingIndex(1);
@@ -268,7 +294,7 @@ namespace RecruitPlayable.EditorTools {
             chooseRT.anchorMax       = new Vector2(0.5f, 0);
             chooseRT.pivot           = new Vector2(0.5f, 0.5f);
             chooseRT.sizeDelta       = new Vector2(340, 340);
-            chooseRT.anchoredPosition = new Vector2(0, 540);
+            chooseRT.anchoredPosition = new Vector2(0, 380);
             AddCG(chooseGO, true);
             var chooseImg = chooseGO.AddComponent<Image>();
             chooseImg.sprite = LoadH5Sprite("btn_choose_full");

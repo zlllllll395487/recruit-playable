@@ -91,6 +91,12 @@ namespace RecruitPlayable.EditorTools {
             carousel.rightArrow = null;
             carousel.dots = new RectTransform[0];
 
+            // Halo（英雄身后径向光晕）— 按 A/B/C 顺序 wire
+            var hA = GameObject.Find("HeroHalo_A")?.GetComponent<Image>();
+            var hB = GameObject.Find("HeroHalo_B")?.GetComponent<Image>();
+            var hC = GameObject.Find("HeroHalo_C")?.GetComponent<Image>();
+            carousel.heroHaloImages = new[] { hA, hB, hC };
+
             // 给三个 HeroOutline 赋 HeroOutlineGlow 材质（轮廓 shader）
             var glowShader = Shader.Find("UI/HeroOutlineGlow");
             if (glowShader != null) {

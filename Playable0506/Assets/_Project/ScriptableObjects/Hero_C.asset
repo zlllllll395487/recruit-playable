@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   heroId: C
   heroName: Aurora
-  accentColor: {r: 1, g: 0.84, b: 0.38, a: 1}
+  accentColor: {r: 0.43, g: 0.76, b: 1, a: 1}
   idleSprite: {fileID: 21300000, guid: 0015b8449656d2f4fa9ea0384a9479b1, type: 3}
   recruitClip: {fileID: 32900000, guid: ca82736de84258b4a9f4cc51c63a8f04, type: 3}
   looks: 70

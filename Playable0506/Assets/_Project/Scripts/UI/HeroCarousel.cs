@@ -10,6 +10,7 @@ namespace RecruitPlayable {
         public RectTransform track;          // 子节点容器，包含 3 个 hero slot
         public Image[] heroImages;           // 3 个英雄 Image，按 A/B/C 顺序
         public Image[] heroOutlineImages;    // 同步立绘的外发光描边 Image（可选，先简单做）
+        public Image[] heroHaloImages;       // 英雄身后径向光晕（按 accentColor 染色）
         public Button leftArrow;
         public Button rightArrow;
         public RectTransform[] dots;         // 3 个圆点
@@ -49,6 +50,11 @@ namespace RecruitPlayable {
                 if (heroOutlineImages != null && i < heroOutlineImages.Length) {
                     heroOutlineImages[i].sprite = cfg.heroes[i].idleSprite;
                     heroOutlineImages[i].color = cfg.heroes[i].accentColor;
+                }
+                // 用 accentColor 染色 halo，保留 alpha
+                if (heroHaloImages != null && i < heroHaloImages.Length && heroHaloImages[i] != null) {
+                    var ac = cfg.heroes[i].accentColor;
+                    heroHaloImages[i].color = new Color(ac.r, ac.g, ac.b, heroHaloImages[i].color.a);
                 }
             }
             if (leftArrow != null)  leftArrow.onClick.AddListener(() => GoTo(_idx - 1));
@@ -129,6 +135,14 @@ namespace RecruitPlayable {
                             heroImages[i].rectTransform.anchoredPosition;
                         heroOutlineImages[i].transform.SetAsFirstSibling();
                         heroOutlineImages[i].transform.localScale = heroImages[i].transform.localScale;
+                    }
+                }
+            }
+            // 仅显示当前英雄的 halo，避免相邻 slot 光晕渗入视口
+            if (heroHaloImages != null) {
+                for (int i = 0; i < heroHaloImages.Length; i++) {
+                    if (heroHaloImages[i] != null) {
+                        heroHaloImages[i].enabled = (i == _idx);
                     }
                 }
             }
