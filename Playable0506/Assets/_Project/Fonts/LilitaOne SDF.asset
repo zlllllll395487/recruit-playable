@@ -19,7 +19,7 @@ MonoBehaviour:
   m_SourceFontFileGUID: 2ec329e4e8f229241b543cc047aa3d36
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: 2ec329e4e8f229241b543cc047aa3d36, type: 3}
   m_SourceFontFile: {fileID: 12800000, guid: 2ec329e4e8f229241b543cc047aa3d36, type: 3}
-  m_AtlasPopulationMode: 1
+  m_AtlasPopulationMode: 0
   m_FaceInfo:
     m_FaceIndex: 0
     m_FamilyName: Lilita One

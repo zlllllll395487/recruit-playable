@@ -46,3 +46,8 @@ Playable0506/Assembly-*.csproj.meta
 *.apk
 *.aab
 *.unitypackage
+
+# Luna Playworks 中间产物（每次 build 重新生成）
+Playable0506/LunaTemp/
+Playable0506/LunaCache/
+Playable0506/LunaExport/

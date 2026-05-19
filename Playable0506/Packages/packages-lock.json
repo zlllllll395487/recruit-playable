@@ -185,6 +185,12 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.playworks.upp": {
+      "version": "file:C:/Users/zhall/Downloads/7.2.0/scripts",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.test-framework": {
       "version": "1.1.33",
       "depth": 0,

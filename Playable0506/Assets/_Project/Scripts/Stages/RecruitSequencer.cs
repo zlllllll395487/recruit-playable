@@ -17,20 +17,13 @@ namespace RecruitPlayable {
         public CanvasGroup vignette;          // 边缘金光
         public ParticleSystem goldenParticles; // 金粒子（可选）
 
-        // 在选定英雄后立即调用：把 VideoPlayer 的 URL 设好并开始 Prepare，
-        // 利用玩家走 Talk/Appraise 的 5-10 秒把视频完全准备好。
-        // Recruit 阶段触发时 isPrepared 已为 true，零等待。
+        // luna-build 分支：Luna 不支持 VideoPlayer.Prepare，改成直接设置 URL；
+        // Luna 内部会处理视频加载。原版 Prepare 预热保留在 main 分支。
         public void Warmup(HeroData hero) {
             if (hero == null || videoPlayer == null) return;
             string videoUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
-#if !UNITY_WEBGL || UNITY_EDITOR
-            if (!videoUrl.StartsWith("http") && !videoUrl.StartsWith("file://")) {
-                videoUrl = "file://" + videoUrl;
-            }
-#endif
             videoPlayer.source = VideoSource.Url;
             videoPlayer.url = videoUrl;
-            videoPlayer.Prepare();
         }
 
         public IEnumerator PlaySequence(HeroData hero, Action onDone) {
@@ -50,23 +43,12 @@ namespace RecruitPlayable {
             // Phase 3：300ms 后开始视频淡入
             yield return new WaitForSeconds(0.3f);
 
-            // 准备视频 — 优先使用 Warmup() 已设好的 URL；若 Warmup 没被调用过则现场设置兜底
+            // luna-build 分支：Luna 不支持 VideoPlayer.Prepare，直接设置 URL → Play。
+            // 原版（Prepare + isPrepared 等待 5s 兜底）保留在 main 分支。
             string expectedUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
-#if !UNITY_WEBGL || UNITY_EDITOR
-            if (!expectedUrl.StartsWith("http") && !expectedUrl.StartsWith("file://")) {
-                expectedUrl = "file://" + expectedUrl;
-            }
-#endif
             if (videoPlayer.source != VideoSource.Url || videoPlayer.url != expectedUrl) {
                 videoPlayer.source = VideoSource.Url;
                 videoPlayer.url = expectedUrl;
-                videoPlayer.Prepare();
-            }
-            // 等视频准备好（最多 5s 兜底；正常情况下 Warmup() 已在 ActionChoice 阶段调好，isPrepared 几乎瞬间为 true）
-            float waited = 0f;
-            while (!videoPlayer.isPrepared && waited < 5f) {
-                yield return null;
-                waited += Time.deltaTime;
             }
             videoPlayer.Play();
             videoLayer.alpha = 0f;

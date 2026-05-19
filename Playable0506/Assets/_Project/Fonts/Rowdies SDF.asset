@@ -19,7 +19,7 @@ MonoBehaviour:
   m_SourceFontFileGUID: a2831d385d0cbab4387d183c78d81b9a
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: a2831d385d0cbab4387d183c78d81b9a, type: 3}
   m_SourceFontFile: {fileID: 12800000, guid: a2831d385d0cbab4387d183c78d81b9a, type: 3}
-  m_AtlasPopulationMode: 1
+  m_AtlasPopulationMode: 0
   m_FaceInfo:
     m_FaceIndex: 0
     m_FamilyName: Rowdies
