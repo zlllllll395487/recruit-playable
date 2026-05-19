@@ -34,12 +34,20 @@ namespace RecruitPlayable {
             // Phase 3：300ms 后开始视频淡入
             yield return new WaitForSeconds(0.3f);
 
-            // 准备视频
-            videoPlayer.clip = hero.recruitClip;
+            // 准备视频 — 用 URL 模式从 StreamingAssets 加载（WebGL 兼容；嵌入式 VideoClip 在 WebGL 不可用）
+            string videoUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
+#if !UNITY_WEBGL || UNITY_EDITOR
+            // 桌面/Android：路径需要 file:// 前缀；StreamingAssets 在桌面是直接文件路径
+            if (!videoUrl.StartsWith("http") && !videoUrl.StartsWith("file://")) {
+                videoUrl = "file://" + videoUrl;
+            }
+#endif
+            videoPlayer.source = VideoSource.Url;
+            videoPlayer.url = videoUrl;
             videoPlayer.Prepare();
-            // 等视频准备好（最多 1.5s 兜底）
+            // 等视频准备好（最多 5s 兜底；正常情况下 GameManager.PrewarmVideos 已把视频缓存好，几乎瞬间命中）
             float waited = 0f;
-            while (!videoPlayer.isPrepared && waited < 1.5f) {
+            while (!videoPlayer.isPrepared && waited < 5f) {
                 yield return null;
                 waited += Time.deltaTime;
             }

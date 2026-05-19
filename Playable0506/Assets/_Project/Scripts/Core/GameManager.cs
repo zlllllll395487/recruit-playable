@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace RecruitPlayable {
     /// <summary>主状态机：Intro → Selection → ActionChoice → Appraisal → Recruit → EndCard</summary>
@@ -28,6 +29,24 @@ namespace RecruitPlayable {
             carousel.Initialize(config, OnHeroSelectedTap);
             ui.HideAllInteractive();
             StartCoroutine(IntroRoutine());
+            StartCoroutine(PrewarmVideos());
+        }
+
+        IEnumerator PrewarmVideos() {
+            foreach (var hero in config.heroes) {
+                string url = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
+#if !UNITY_WEBGL || UNITY_EDITOR
+                if (!url.StartsWith("http") && !url.StartsWith("file://")) url = "file://" + url;
+#endif
+                using (var req = UnityWebRequest.Get(url)) {
+                    yield return req.SendWebRequest();
+                    if (req.result != UnityWebRequest.Result.Success) {
+                        Debug.LogWarning("[Prewarm] " + hero.heroId + " failed: " + req.error);
+                    } else {
+                        Debug.Log("[Prewarm] " + hero.heroId + " cached (" + req.downloadedBytes + " B)");
+                    }
+                }
+            }
         }
 
         IEnumerator IntroRoutine() {
