@@ -1,4 +1,8 @@
 Shader "UI/HeroOutlineGlow" {
+    // luna-build 分支：原版 8 方向 alpha dilation 在 Luna 的 WebGL1 target 上无法编译
+    // (Hidden/InternalErrorShader fallback)。简化为单 tex2D 采样版本以保证编译通过。
+    // outline 视觉效果在运行时被 HeroCarousel 主动禁用（heroOutlineImages[i].enabled = false），
+    // 此 shader 只为保留 material 引用、避免黑屏。原版保留在 main 分支。
     Properties {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _Color ("Tint", Color) = (1,1,1,1)
@@ -51,10 +55,8 @@ Shader "UI/HeroOutlineGlow" {
             };
 
             sampler2D _MainTex;
-            float4 _MainTex_TexelSize;
             fixed4 _Color;
             fixed4 _OutlineColor;
-            float  _OutlineWidth;
 
             v2f vert(appdata_t IN) {
                 v2f OUT;
@@ -65,27 +67,10 @@ Shader "UI/HeroOutlineGlow" {
             }
 
             fixed4 frag(v2f IN) : SV_Target {
-                fixed4 c = tex2D(_MainTex, IN.uv);
-                float selfAlpha = c.a;
-
-                // 8 方向 alpha dilation：检查周围像素是否有不透明内容
-                float2 step = _MainTex_TexelSize.xy * _OutlineWidth;
-                float maxNeighbor = 0;
-                maxNeighbor = max(maxNeighbor, tex2D(_MainTex, IN.uv + float2( step.x,  0     )).a);
-                maxNeighbor = max(maxNeighbor, tex2D(_MainTex, IN.uv + float2(-step.x,  0     )).a);
-                maxNeighbor = max(maxNeighbor, tex2D(_MainTex, IN.uv + float2( 0,       step.y)).a);
-                maxNeighbor = max(maxNeighbor, tex2D(_MainTex, IN.uv + float2( 0,      -step.y)).a);
-                maxNeighbor = max(maxNeighbor, tex2D(_MainTex, IN.uv + float2( step.x,  step.y)).a);
-                maxNeighbor = max(maxNeighbor, tex2D(_MainTex, IN.uv + float2(-step.x,  step.y)).a);
-                maxNeighbor = max(maxNeighbor, tex2D(_MainTex, IN.uv + float2( step.x, -step.y)).a);
-                maxNeighbor = max(maxNeighbor, tex2D(_MainTex, IN.uv + float2(-step.x, -step.y)).a);
-
-                // 轮廓区域 = 自身透明 但 邻域有不透明像素
-                float isEdge = (1.0 - selfAlpha) * maxNeighbor;
-
-                fixed4 outlineCol = _OutlineColor * IN.color;
-                outlineCol.a = isEdge * _OutlineColor.a * IN.color.a;
-                return outlineCol;
+                fixed4 c = tex2D(_MainTex, IN.uv) * IN.color;
+                // outline 已在 C# 层禁用，此处直接输出 0 alpha 避免任何描边渲染
+                c.a = 0;
+                return c;
             }
             ENDCG
         }
