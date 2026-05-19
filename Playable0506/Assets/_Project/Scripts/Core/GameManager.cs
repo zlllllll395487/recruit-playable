@@ -69,6 +69,9 @@ namespace RecruitPlayable {
         public void OnChooseConfirmed() {
             if (_state != GameState.Selection) return;
             _selectedHeroIdx = carousel.CurrentIndex;
+            // 立刻让 VideoPlayer 开始 Prepare 选中英雄的视频。
+            // 玩家在 Talk/Appraise 阶段交互的几秒里视频会完全就绪，Recruit 阶段零等待。
+            if (recruit != null) recruit.Warmup(SelectedHero);
             EnterActionChoice();
         }
 

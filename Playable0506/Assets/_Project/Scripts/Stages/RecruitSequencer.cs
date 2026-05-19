@@ -17,6 +17,22 @@ namespace RecruitPlayable {
         public CanvasGroup vignette;          // 边缘金光
         public ParticleSystem goldenParticles; // 金粒子（可选）
 
+        // 在选定英雄后立即调用：把 VideoPlayer 的 URL 设好并开始 Prepare，
+        // 利用玩家走 Talk/Appraise 的 5-10 秒把视频完全准备好。
+        // Recruit 阶段触发时 isPrepared 已为 true，零等待。
+        public void Warmup(HeroData hero) {
+            if (hero == null || videoPlayer == null) return;
+            string videoUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
+#if !UNITY_WEBGL || UNITY_EDITOR
+            if (!videoUrl.StartsWith("http") && !videoUrl.StartsWith("file://")) {
+                videoUrl = "file://" + videoUrl;
+            }
+#endif
+            videoPlayer.source = VideoSource.Url;
+            videoPlayer.url = videoUrl;
+            videoPlayer.Prepare();
+        }
+
         public IEnumerator PlaySequence(HeroData hero, Action onDone) {
             // 胜利号角 + 强震动（整个演出的情绪峰值）
             if (AudioManager.Instance != null) AudioManager.Instance.Play("victory");
@@ -34,18 +50,19 @@ namespace RecruitPlayable {
             // Phase 3：300ms 后开始视频淡入
             yield return new WaitForSeconds(0.3f);
 
-            // 准备视频 — 用 URL 模式从 StreamingAssets 加载（WebGL 兼容；嵌入式 VideoClip 在 WebGL 不可用）
-            string videoUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
+            // 准备视频 — 优先使用 Warmup() 已设好的 URL；若 Warmup 没被调用过则现场设置兜底
+            string expectedUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
 #if !UNITY_WEBGL || UNITY_EDITOR
-            // 桌面/Android：路径需要 file:// 前缀；StreamingAssets 在桌面是直接文件路径
-            if (!videoUrl.StartsWith("http") && !videoUrl.StartsWith("file://")) {
-                videoUrl = "file://" + videoUrl;
+            if (!expectedUrl.StartsWith("http") && !expectedUrl.StartsWith("file://")) {
+                expectedUrl = "file://" + expectedUrl;
             }
 #endif
-            videoPlayer.source = VideoSource.Url;
-            videoPlayer.url = videoUrl;
-            videoPlayer.Prepare();
-            // 等视频准备好（最多 5s 兜底；正常情况下 GameManager.PrewarmVideos 已把视频缓存好，几乎瞬间命中）
+            if (videoPlayer.source != VideoSource.Url || videoPlayer.url != expectedUrl) {
+                videoPlayer.source = VideoSource.Url;
+                videoPlayer.url = expectedUrl;
+                videoPlayer.Prepare();
+            }
+            // 等视频准备好（最多 5s 兜底；正常情况下 Warmup() 已在 ActionChoice 阶段调好，isPrepared 几乎瞬间为 true）
             float waited = 0f;
             while (!videoPlayer.isPrepared && waited < 5f) {
                 yield return null;
