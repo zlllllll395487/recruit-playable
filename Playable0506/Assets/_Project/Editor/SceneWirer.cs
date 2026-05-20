@@ -52,7 +52,7 @@ namespace RecruitPlayable.EditorTools {
             ui.actionPrimary = GameObject.Find("ActionPrimary")?.GetComponent<CanvasGroup>();
             ui.actionSecondary = GameObject.Find("ActionSecondary")?.GetComponent<CanvasGroup>();
             ui.speechBubble = GameObject.Find("SpeechBubble")?.GetComponent<CanvasGroup>();
-            ui.speechText = GameObject.Find("SpeechBubble/Text")?.GetComponent<TextMeshProUGUI>();
+            ui.speechText = GameObject.Find("SpeechBubble/Text")?.GetComponent<UnityEngine.UI.Text>();
             ui.statPanelTL = GameObject.Find("StatPanelTL")?.GetComponent<CanvasGroup>();
             ui.statPanelTR = GameObject.Find("StatPanelTR")?.GetComponent<CanvasGroup>();
             ui.statPanelBR = GameObject.Find("StatPanelBR")?.GetComponent<CanvasGroup>();

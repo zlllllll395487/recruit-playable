@@ -29,7 +29,7 @@ namespace RecruitPlayable {
 
         [Header("Speech Bubble")]
         public CanvasGroup speechBubble;
-        public TextMeshProUGUI speechText;
+        public UnityEngine.UI.Text speechText;
 
         [Header("Stat Panels")]
         public CanvasGroup statPanelTL;
@@ -98,7 +98,8 @@ namespace RecruitPlayable {
         public void HideAllInteractive() {
             SetCG(actionPrimary,   false);
             SetCG(actionSecondary, false);
-            SetCG(speechBubble,    false);
+            // luna-build：SpeechBubble 用 GO SetActive 控制，CG.alpha 保持 1
+            // SetCG(speechBubble,    false);
             SetCG(statPanelTL,     false);
             SetCG(statPanelTR,     false);
             SetCG(statPanelBR,     false);
@@ -133,13 +134,9 @@ namespace RecruitPlayable {
         public void ShowSpeechBubble(string text, float autoHideAfter = 0f) {
             if (speechBubble == null || speechText == null) return;
             if (_bubbleCoroutine != null) StopCoroutine(_bubbleCoroutine);
-            speechText.text     = text;
-            speechText.color    = new Color(0.16f, 0.10f, 0.05f);
-            speechText.alpha    = 1f;
-            speechText.maskable = false;
-            speechText.fontStyle = TMPro.FontStyles.Bold;
-            speechText.outlineWidth = 0.12f;
-            speechText.outlineColor = new Color32(255, 255, 255, 180);
+            // luna-build：UI.Text 没有 TMP 的 outlineWidth/outlineColor/maskable 属性，简化处理
+            speechText.text  = text;
+            speechText.color = new Color(0.16f, 0.10f, 0.05f);
             var rt = speechText.rectTransform;
             rt.anchorMin     = new Vector2(0.5f, 0.5f);
             rt.anchorMax     = new Vector2(0.5f, 0.5f);
@@ -147,18 +144,18 @@ namespace RecruitPlayable {
             rt.sizeDelta     = new Vector2(780, 130);
             rt.anchoredPosition = new Vector2(0, 20);
             rt.localScale    = Vector3.one;
-            rt.localPosition = new Vector3(rt.localPosition.x, rt.localPosition.y, 0);
             rt.SetAsLastSibling();
-            SetCG(speechBubble, true);
+            // luna-build：SpeechBubble 用 GO SetActive 代替 CG.alpha 切换
+            speechBubble.gameObject.SetActive(true);
             if (autoHideAfter > 0) _bubbleCoroutine = StartCoroutine(HideBubbleAfter(autoHideAfter));
         }
         IEnumerator HideBubbleAfter(float t) {
             yield return new WaitForSeconds(t);
-            SetCG(speechBubble, false);
+            if (speechBubble != null) speechBubble.gameObject.SetActive(false);
         }
         public void HideSpeechBubble() {
             if (_bubbleCoroutine != null) StopCoroutine(_bubbleCoroutine);
-            SetCG(speechBubble, false);
+            if (speechBubble != null) speechBubble.gameObject.SetActive(false);
         }
 
         // T5: 格式 "X/100"

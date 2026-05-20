@@ -1045,7 +1045,7 @@ MonoBehaviour:
   curtainLeft: {fileID: 0}
   curtainRight: {fileID: 0}
   speechBubble: {fileID: 1791673349}
-  speechText: {fileID: 0}
+  speechText: {fileID: 1304299963}
   statPanelTL: {fileID: 1303145033}
   statPanelTR: {fileID: 1896008684}
   statPanelBR: {fileID: 1075840467}
@@ -2579,7 +2579,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 46
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -3892,7 +3892,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1791673346
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3959,9 +3959,9 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1791673345}
   m_Enabled: 1
-  m_Alpha: 0
-  m_Interactable: 0
-  m_BlocksRaycasts: 0
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
 --- !u!1 &1896008679
 GameObject:
@@ -4138,7 +4138,7 @@ MonoBehaviour:
     m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 84
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
