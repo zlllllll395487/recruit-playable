@@ -73,9 +73,9 @@ namespace RecruitPlayable {
             yield return new WaitForSeconds(videoDur);
             if (videoPlayer != null) videoPlayer.Stop();
 
-            // Phase 5：淡出过场到 EndCard（同样瞬时）
+            // Phase 5：淡出过场到 EndCard（用 SetActive 不用 alpha，Luna alpha 切换不稳）
             yield return new WaitForSeconds(config.endCardDelay);
-            videoLayer.alpha = 0f;
+            videoLayer.gameObject.SetActive(false);
             if (vignette != null) vignette.alpha = 0f;
             if (goldenParticles != null) goldenParticles.Stop();
 

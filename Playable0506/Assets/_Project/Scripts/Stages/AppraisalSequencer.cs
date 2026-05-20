@@ -84,8 +84,8 @@ namespace RecruitPlayable {
             ui.eliteBanner.alpha = 0f;
             ui.eliteBannerRect.localScale = Vector3.one * 1.3f;
             // Banner anchor=(0.5,1) pivot=(0.5,1)：y=0 表示 banner 顶部贴画布顶；y 正值则上移出屏外
-            Vector2 startPos = new Vector2(0, 200);   // 从屏幕上方落下
-            Vector2 endPos = new Vector2(0, -30);     // 落到屏幕顶部可见位置
+            Vector2 startPos = new Vector2(0, 0);     // 从屏幕上方落下
+            Vector2 endPos = new Vector2(0, -230);    // luna-build：往下移让布局更紧凑（原 -30）
             ui.eliteBannerRect.anchoredPosition = startPos;
             float t = 0f;
             float dur = config.ratingDropDuration * 0.55f;
