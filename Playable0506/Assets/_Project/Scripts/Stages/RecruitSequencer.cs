@@ -66,8 +66,11 @@ namespace RecruitPlayable {
             if (vignette != null) vignette.alpha = 1f;
             if (goldenParticles != null) goldenParticles.Play();
 
-            // Phase 4：等视频时长（不再轮询 isPlaying，避免 Luna VideoPlayer 状态读取不一致）
-            yield return new WaitForSeconds(config.recruitVideoDuration);
+            // Phase 4：等视频时长（动态读 clip.length，避免 config 配错值导致提前掐断）
+            float videoDur = (videoPlayer != null && videoPlayer.clip != null)
+                ? (float)videoPlayer.clip.length
+                : config.recruitVideoDuration;
+            yield return new WaitForSeconds(videoDur);
             if (videoPlayer != null) videoPlayer.Stop();
 
             // Phase 5：淡出过场到 EndCard（同样瞬时）
