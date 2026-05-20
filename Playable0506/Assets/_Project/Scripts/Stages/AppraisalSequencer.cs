@@ -110,11 +110,11 @@ namespace RecruitPlayable {
             ui.eliteBannerRect.localScale = Vector3.one;
             ui.eliteBanner.alpha = 1f;
 
-            // 冲击波 — 已取消（用户要求移除金色光环扩张）
-            // if (shockwaveCG != null) StartCoroutine(Shockwave());
-
-            // 微震
-            yield return Shake(0.3f, 8f);
+            // luna-build：原版 yield return Shake(...) 嵌套 IEnumerator 在 Luna 转译里
+            // 状态机会卡住，导致后续 onDone 不被触发（按钮不显示）。改成 StartCoroutine
+            // 异步启动 + WaitForSeconds 等待固定时长，避免嵌套迭代器路径。
+            StartCoroutine(Shake(0.3f, 8f));
+            yield return new WaitForSeconds(0.3f);
         }
 
         // 砸下式登场：从大尺寸+透明 → 缩到 1.0 + 实体，落地后白色快闪 + 轻微抖动
