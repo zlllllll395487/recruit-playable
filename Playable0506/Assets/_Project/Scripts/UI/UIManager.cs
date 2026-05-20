@@ -103,7 +103,8 @@ namespace RecruitPlayable {
             SetCG(statPanelTR,     false);
             SetCG(statPanelBR,     false);
             SetCG(eliteBanner,     false);
-            SetCG(endCard,         false);
+            // luna-build：EndCard 用 GO SetActive 控制，CG alpha 保持 1
+            // SetCG(endCard,         false);
             // luna-build：introHint 留在 alpha=1 不让它走 0→1 切换（Luna 里 alpha 切换不稳）
             // SetCG(introHint,       false);
             SetCG(heroNav,         false);
@@ -117,7 +118,12 @@ namespace RecruitPlayable {
         public void ShowChooseButton(bool show)     => SetCG(chooseGroup, show);
         public void ShowActionPrimary(bool show)    => SetCG(actionPrimary, show);
         public void ShowActionSecondary(bool show)  => SetCG(actionSecondary, show);
-        public void ShowEndCard(bool show)          => SetCG(endCard, show);
+        public void ShowEndCard(bool show) {
+            // luna-build：EndCard 用 GO SetActive 切换而不是 CG alpha
+            // （Luna 对 alpha 0→1 切换不稳，可能不显示）。
+            // 场景里 EndCard 初始 GO inactive + CG alpha=1。
+            if (endCard != null) endCard.gameObject.SetActive(show);
+        }
         public void ShowCurtains(bool show) {
             SetCG(curtainLeft,  show);
             SetCG(curtainRight, show);
