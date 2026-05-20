@@ -104,7 +104,8 @@ namespace RecruitPlayable {
             SetCG(statPanelBR,     false);
             SetCG(eliteBanner,     false);
             SetCG(endCard,         false);
-            SetCG(introHint,       false);
+            // luna-build：introHint 留在 alpha=1 不让它走 0→1 切换（Luna 里 alpha 切换不稳）
+            // SetCG(introHint,       false);
             SetCG(heroNav,         false);
             SetCG(chooseGroup,     false);
             SetCG(curtainLeft,     false);
