@@ -14,10 +14,6 @@ namespace RecruitPlayable {
         public CanvasGroup shockwaveCG;
 
         public IEnumerator PlaySequence(HeroData hero, Action onDone) {
-            // 1) 扫描光带 + 科幻嗡声 — 已取消（用户要求移除紫色扫描线）
-            // if (AudioManager.Instance != null) AudioManager.Instance.Play("scan");
-            // yield return Scan();
-
             // 按当前英雄切换 stat 面板贴图
             for (int i = 0; i < 3; i++) {
                 var panelCG = ui.GetStatPanel(i);
@@ -27,12 +23,15 @@ namespace RecruitPlayable {
             }
             yield return null;
 
-            // 2) 逐个展示 3 个面板（砸下 + 闪光 + 抖动）
+            // 2) 逐个展示 3 个面板（luna-build：嵌套 yield 在 Luna 转译里有问题，
+            //    改用 StartCoroutine + 固定时长 WaitForSeconds 避开嵌套迭代器路径）
             if (AudioManager.Instance != null) AudioManager.Instance.Play("stat");
+            float stampDur = 0.22f + 0.16f + 0.18f; // StatStamp 主体 + ShakePanel + 间隔
             for (int i = 0; i < 3; i++) {
                 Haptic.Light();
-                yield return StatStamp(ui.GetStatPanel(i));
-                yield return new WaitForSeconds(0.18f);
+                var panel = ui.GetStatPanel(i);
+                if (panel != null) StartCoroutine(StatStamp(panel));
+                yield return new WaitForSeconds(stampDur);
             }
 
             yield return new WaitForSeconds(0.2f);

@@ -22,6 +22,7 @@ namespace RecruitPlayable {
 
         [Header("Settings")]
         public float slideTransitionTime = 0.35f;
+        public float slotWidth = 1080f;   // luna-build：硬编码避免运行时读 rect.width 拿到 0
 
         GameConfig _config;
         Action<int> _onTap;
@@ -94,7 +95,7 @@ namespace RecruitPlayable {
             newIdx = ((newIdx % n) + n) % n;
             bool changed = (newIdx != _idx);
             _idx = newIdx;
-            float vw = ((RectTransform)track.parent).rect.width;
+            float vw = slotWidth;
             _slideStartX = track.anchoredPosition.x;
             _slideTargetX = -newIdx * vw;
             _slideStartTime = Time.time;
@@ -105,7 +106,7 @@ namespace RecruitPlayable {
         }
 
         void SnapTrackTo(int idx) {
-            float vw = ((RectTransform)track.parent).rect.width;
+            float vw = slotWidth;
             var p = track.anchoredPosition;
             p.x = -idx * vw;
             track.anchoredPosition = p;
@@ -166,7 +167,7 @@ namespace RecruitPlayable {
         public void OnDrag(PointerEventData e) {
             if (!_isDragging) return;
             float dx = e.position.x - _dragStart.x;
-            float vw = ((RectTransform)track.parent).rect.width;
+            float vw = slotWidth;
             var p = track.anchoredPosition;
             p.x = -_idx * vw + dx;
             track.anchoredPosition = p;
