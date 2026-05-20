@@ -70,16 +70,18 @@ namespace RecruitPlayable {
             float videoDur = (videoPlayer != null && videoPlayer.clip != null)
                 ? (float)videoPlayer.clip.length
                 : config.recruitVideoDuration;
-            yield return new WaitForSeconds(videoDur);
-            if (videoPlayer != null) videoPlayer.Stop();
+            yield return new WaitForSeconds(videoDur + 0.3f);
 
-            // Phase 5：淡出过场到 EndCard（用 SetActive 不用 alpha，Luna alpha 切换不稳）
-            yield return new WaitForSeconds(config.endCardDelay);
+            // Phase 5：彻底关闭视频相关 GO，立即触发 EndCard
+            // luna-build：不再 yield 等 endCardDelay/0.2f，因为多重 WaitForSeconds 在 Luna
+            // 长链协程里可能会断。直接 SetActive + invoke。
+            if (videoPlayer != null) {
+                videoPlayer.Stop();
+                videoPlayer.gameObject.SetActive(false);
+            }
             videoLayer.gameObject.SetActive(false);
             if (vignette != null) vignette.alpha = 0f;
             if (goldenParticles != null) goldenParticles.Stop();
-
-            yield return new WaitForSeconds(0.2f);
             onDone?.Invoke();
         }
 
