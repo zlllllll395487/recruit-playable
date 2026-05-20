@@ -22,7 +22,7 @@ namespace RecruitPlayable {
 
         [Header("Settings")]
         public float slideTransitionTime = 0.35f;
-        public float slotWidth = 1080f;   // luna-build：硬编码避免运行时读 rect.width 拿到 0
+        public float slotWidth = 1080f;   // fallback only; runtime 优先用 viewport.rect.width
 
         GameConfig _config;
         Action<int> _onTap;
@@ -34,6 +34,15 @@ namespace RecruitPlayable {
         float _slideStartX;
         float _slideTargetX;
         bool _animating;
+        float _vw;   // 缓存运行时 viewport 宽度
+
+        float ViewportWidth() {
+            var vpRt = (RectTransform)track.parent;
+            float w = vpRt != null ? vpRt.rect.width : 0f;
+            if (w > 1f) _vw = w;
+            else if (_vw < 1f) _vw = slotWidth;  // 首帧布局未就绪兜底
+            return _vw;
+        }
 
         public void Initialize(GameConfig cfg, Action<int> onTap) {
             _config = cfg;
@@ -78,6 +87,16 @@ namespace RecruitPlayable {
                 var p = track.anchoredPosition;
                 p.x = Mathf.Lerp(_slideStartX, _slideTargetX, ease);
                 track.anchoredPosition = p;
+            } else if (!_isDragging) {
+                // luna-build：每帧自校正 track 位置到当前 idx 的正确居中位置
+                // （首帧 Luna layout 未就绪导致 vw 错误时，下一帧自动修正）
+                float vw = ViewportWidth();
+                float expected = -_idx * vw;
+                var p = track.anchoredPosition;
+                if (Mathf.Abs(p.x - expected) > 0.5f) {
+                    p.x = expected;
+                    track.anchoredPosition = p;
+                }
             }
 
             // 实时同步 outline scale 到 hero scale（保证呼吸动效完全同步）
@@ -95,7 +114,7 @@ namespace RecruitPlayable {
             newIdx = ((newIdx % n) + n) % n;
             bool changed = (newIdx != _idx);
             _idx = newIdx;
-            float vw = slotWidth;
+            float vw = ViewportWidth();
             _slideStartX = track.anchoredPosition.x;
             _slideTargetX = -newIdx * vw;
             _slideStartTime = Time.time;
@@ -106,7 +125,7 @@ namespace RecruitPlayable {
         }
 
         void SnapTrackTo(int idx) {
-            float vw = slotWidth;
+            float vw = ViewportWidth();
             var p = track.anchoredPosition;
             p.x = -idx * vw;
             track.anchoredPosition = p;
@@ -167,7 +186,7 @@ namespace RecruitPlayable {
         public void OnDrag(PointerEventData e) {
             if (!_isDragging) return;
             float dx = e.position.x - _dragStart.x;
-            float vw = slotWidth;
+            float vw = ViewportWidth();
             var p = track.anchoredPosition;
             p.x = -_idx * vw + dx;
             track.anchoredPosition = p;

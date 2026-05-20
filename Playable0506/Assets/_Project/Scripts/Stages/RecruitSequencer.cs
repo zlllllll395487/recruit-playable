@@ -27,57 +27,56 @@ namespace RecruitPlayable {
         }
 
         public IEnumerator PlaySequence(HeroData hero, Action onDone) {
-            // 胜利号角 + 强震动（整个演出的情绪峰值）
+            // luna-build：所有 StartCoroutine 嵌套 + yield return IEnumerator 在 Luna 转译里
+            // 容易触发状态机问题，导致协程卡住或被吞异常。简化为顺序直接 set alpha，
+            // 用固定 WaitForSeconds 占位代替 fade 动画。视觉损失：UI 不再淡入淡出，瞬切。
+
+            // 胜利号角 + 强震动
             if (AudioManager.Instance != null) AudioManager.Instance.Play("victory");
             Haptic.Heavy();
 
-            // Phase 1：UI 同步淡出（统计面板 + ELITE 横幅 + 已隐藏的二级按钮）
-            StartCoroutine(FadeOut(ui.statPanelTL, 0.35f));
-            StartCoroutine(FadeOut(ui.statPanelTR, 0.35f));
-            StartCoroutine(FadeOut(ui.statPanelBR, 0.35f));
-            StartCoroutine(FadeOut(ui.eliteBanner, 0.35f));
+            // Phase 1：UI 瞬时隐藏（替代 fade）
+            if (ui.statPanelTL != null) ui.statPanelTL.alpha = 0f;
+            if (ui.statPanelTR != null) ui.statPanelTR.alpha = 0f;
+            if (ui.statPanelBR != null) ui.statPanelBR.alpha = 0f;
+            if (ui.eliteBanner != null) ui.eliteBanner.alpha = 0f;
 
-            // Phase 2：金色闪光淡入
-            StartCoroutine(Flash());
-
-            // Phase 3：300ms 后开始视频淡入
-            yield return new WaitForSeconds(0.3f);
-
-            // luna-build 分支：Luna 不支持 VideoPlayer.Prepare，直接设置 URL → Play。
-            // 原版（Prepare + isPrepared 等待 5s 兜底）保留在 main 分支。
-            string expectedUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
-            if (videoPlayer.source != VideoSource.Url || videoPlayer.url != expectedUrl) {
-                videoPlayer.source = VideoSource.Url;
-                videoPlayer.url = expectedUrl;
-            }
-            videoPlayer.Play();
+            // Phase 2：VideoLayer 提前 SetActive(true)，让 Luna 引擎尽早接管 RawImage + RT
             videoLayer.alpha = 0f;
             videoLayer.gameObject.SetActive(true);
 
-            // Vignette + 粒子
-            if (vignette != null) StartCoroutine(FadeIn(vignette, 0.4f));
+            // Phase 3：金色闪光淡入（Flash 内部无嵌套 yield，安全）
+            StartCoroutine(Flash());
+
+            // 等 0.3s 让金光启动
+            yield return new WaitForSeconds(0.3f);
+
+            // 设视频 URL → Play（Luna 自己处理加载）
+            string expectedUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
+            if (videoPlayer != null) {
+                videoPlayer.source = VideoSource.Url;
+                videoPlayer.url = expectedUrl;
+                videoPlayer.Play();
+            }
+
+            // 视频层瞬时显现（替代 FadeIn 嵌套 yield）
+            videoLayer.alpha = 1f;
+
+            // Vignette + 粒子（独立协程，Luna 静默）
+            if (vignette != null) vignette.alpha = 1f;
             if (goldenParticles != null) goldenParticles.Play();
 
-            // 视频层淡入
-            yield return FadeIn(videoLayer, 0.4f);
+            // Phase 4：等视频时长（不再轮询 isPlaying，避免 Luna VideoPlayer 状态读取不一致）
+            yield return new WaitForSeconds(config.recruitVideoDuration);
+            if (videoPlayer != null) videoPlayer.Stop();
 
-            // Phase 4：等视频结束（或兜底超时）
-            float elapsed = 0f;
-            float max = config.recruitVideoDuration + 1.0f;
-            while (elapsed < max && (videoPlayer.isPlaying || elapsed < config.recruitVideoDuration)) {
-                if (!videoPlayer.isPlaying && elapsed > 0.3f) break;
-                elapsed += Time.deltaTime;
-                yield return null;
-            }
-            videoPlayer.Stop();
-
-            // Phase 5：淡出过场到 EndCard
+            // Phase 5：淡出过场到 EndCard（同样瞬时）
             yield return new WaitForSeconds(config.endCardDelay);
-            StartCoroutine(FadeOut(videoLayer, 0.4f));
-            if (vignette != null) StartCoroutine(FadeOut(vignette, 0.4f));
+            videoLayer.alpha = 0f;
+            if (vignette != null) vignette.alpha = 0f;
             if (goldenParticles != null) goldenParticles.Stop();
 
-            yield return new WaitForSeconds(0.4f);
+            yield return new WaitForSeconds(0.2f);
             onDone?.Invoke();
         }
 
