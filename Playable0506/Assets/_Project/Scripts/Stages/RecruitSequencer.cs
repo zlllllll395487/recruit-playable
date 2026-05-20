@@ -72,17 +72,15 @@ namespace RecruitPlayable {
                 : config.recruitVideoDuration;
             yield return new WaitForSeconds(videoDur + 0.3f);
 
-            // Phase 5：彻底关闭视频相关 GO，立即触发 EndCard
-            // luna-build：不再 yield 等 endCardDelay/0.2f，因为多重 WaitForSeconds 在 Luna
-            // 长链协程里可能会断。直接 SetActive + invoke。
-            if (videoPlayer != null) {
-                videoPlayer.Stop();
-                videoPlayer.gameObject.SetActive(false);
-            }
+            // Phase 5：触发 EndCard 优先，再清理 VideoPlayer。
+            // luna-build：把 onDone 放在最前面，即使后续 GO 操作抛异常 EndCard 也能进。
+            // 不调 videoPlayer.Stop()，避免 Luna 转译里可能的异常吞掉协程。
+            onDone?.Invoke();
+
             videoLayer.gameObject.SetActive(false);
+            if (videoPlayer != null) videoPlayer.gameObject.SetActive(false);
             if (vignette != null) vignette.alpha = 0f;
             if (goldenParticles != null) goldenParticles.Stop();
-            onDone?.Invoke();
         }
 
         IEnumerator Flash() {
