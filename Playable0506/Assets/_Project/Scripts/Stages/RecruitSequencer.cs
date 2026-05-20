@@ -51,11 +51,11 @@ namespace RecruitPlayable {
             // 等 0.3s 让金光启动
             yield return new WaitForSeconds(0.3f);
 
-            // 设视频 URL → Play（Luna 自己处理加载）
-            string expectedUrl = System.IO.Path.Combine(Application.streamingAssetsPath, "hero_" + hero.heroId + "_recruit.mp4");
-            if (videoPlayer != null) {
-                videoPlayer.source = VideoSource.Url;
-                videoPlayer.url = expectedUrl;
+            // 设视频 → Play（luna-build：用 VideoClip 模式，Luna 可原生打包嵌入式 VideoClip
+            // 比 StreamingAssets URL 更兼容；原 URL 模式保留在 main 分支用于 Unity WebGL）
+            if (videoPlayer != null && hero.recruitClip != null) {
+                videoPlayer.source = VideoSource.VideoClip;
+                videoPlayer.clip = hero.recruitClip;
                 videoPlayer.Play();
             }
 

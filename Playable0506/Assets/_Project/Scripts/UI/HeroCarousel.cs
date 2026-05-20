@@ -44,6 +44,15 @@ namespace RecruitPlayable {
             return _vw;
         }
 
+        // 计算 track 应该放在哪让 slot i 的中心对齐 viewport 中心
+        // 推导：slot 中心在 track-space 是 i*slotWidth + slotWidth/2（slot pivot=(0,0.5)，anchored left）
+        // slot 中心在 viewport-space = track.x + slot 中心 in track-space
+        // 要 = viewport_width/2 → track.x = viewport_width/2 - i*slotWidth - slotWidth/2
+        float TrackXForIdx(int idx) {
+            float vw = ViewportWidth();
+            return vw * 0.5f - slotWidth * (idx + 0.5f);
+        }
+
         public void Initialize(GameConfig cfg, Action<int> onTap) {
             _config = cfg;
             _onTap = onTap;
@@ -89,9 +98,8 @@ namespace RecruitPlayable {
                 track.anchoredPosition = p;
             } else if (!_isDragging) {
                 // luna-build：每帧自校正 track 位置到当前 idx 的正确居中位置
-                // （首帧 Luna layout 未就绪导致 vw 错误时，下一帧自动修正）
-                float vw = ViewportWidth();
-                float expected = -_idx * vw;
+                // 用 viewport 实际宽度计算，避免 Luna 真机 viewport ≠ 1080 时偏移
+                float expected = TrackXForIdx(_idx);
                 var p = track.anchoredPosition;
                 if (Mathf.Abs(p.x - expected) > 0.5f) {
                     p.x = expected;
@@ -114,9 +122,8 @@ namespace RecruitPlayable {
             newIdx = ((newIdx % n) + n) % n;
             bool changed = (newIdx != _idx);
             _idx = newIdx;
-            float vw = ViewportWidth();
             _slideStartX = track.anchoredPosition.x;
-            _slideTargetX = -newIdx * vw;
+            _slideTargetX = TrackXForIdx(newIdx);
             _slideStartTime = Time.time;
             _animating = true;
             UpdateDots();
@@ -125,9 +132,8 @@ namespace RecruitPlayable {
         }
 
         void SnapTrackTo(int idx) {
-            float vw = ViewportWidth();
             var p = track.anchoredPosition;
-            p.x = -idx * vw;
+            p.x = TrackXForIdx(idx);
             track.anchoredPosition = p;
             _animating = false;
             UpdateHeroVisuals();
@@ -186,9 +192,8 @@ namespace RecruitPlayable {
         public void OnDrag(PointerEventData e) {
             if (!_isDragging) return;
             float dx = e.position.x - _dragStart.x;
-            float vw = ViewportWidth();
             var p = track.anchoredPosition;
-            p.x = -_idx * vw + dx;
+            p.x = TrackXForIdx(_idx) + dx;
             track.anchoredPosition = p;
         }
         public void OnEndDrag(PointerEventData e) {
