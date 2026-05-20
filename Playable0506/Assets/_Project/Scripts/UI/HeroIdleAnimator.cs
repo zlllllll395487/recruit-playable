@@ -19,6 +19,7 @@ namespace RecruitPlayable {
 
         void OnEnable() {
             _rt = GetComponent<RectTransform>();
+            if (_rt == null) return;
             _baseScale = _rt.localScale;
             _basePosition = _rt.anchoredPosition;
             _t = 0;
@@ -32,6 +33,7 @@ namespace RecruitPlayable {
         }
 
         void Update() {
+            if (_rt == null) return;
             _t += Time.deltaTime;
 
             // 呼吸：正弦缩放
