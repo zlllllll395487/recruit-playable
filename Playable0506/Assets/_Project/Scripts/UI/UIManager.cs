@@ -137,6 +137,9 @@ namespace RecruitPlayable {
             // luna-build：UI.Text 没有 TMP 的 outlineWidth/outlineColor/maskable 属性，简化处理
             speechText.text  = text;
             speechText.color = new Color(0.16f, 0.10f, 0.05f);
+            // 防御性：强制 Wrap 模式让台词在 sizeDelta 宽度内自动换行（修复反馈 #2 文字出框）
+            speechText.horizontalOverflow = UnityEngine.HorizontalWrapMode.Wrap;
+            speechText.verticalOverflow   = UnityEngine.VerticalWrapMode.Overflow;
             var rt = speechText.rectTransform;
             rt.anchorMin     = new Vector2(0.5f, 0.5f);
             rt.anchorMax     = new Vector2(0.5f, 0.5f);
