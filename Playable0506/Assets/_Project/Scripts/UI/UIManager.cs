@@ -31,6 +31,9 @@ namespace RecruitPlayable {
         public CanvasGroup speechBubble;
         public UnityEngine.UI.Text speechText;
 
+        [Header("Transition Mask (luna-build: Dismiss 黑屏过渡用)")]
+        public UnityEngine.UI.Image transitionMask;
+
         [Header("Stat Panels")]
         public CanvasGroup statPanelTL;
         public CanvasGroup statPanelTR;
@@ -184,6 +187,25 @@ namespace RecruitPlayable {
             cg.alpha          = show ? 1f : 0f;
             cg.interactable   = show;
             cg.blocksRaycasts = show;
+        }
+
+        // luna-build：用 Image.color.a 做淡入淡出，避开 CanvasGroup.alpha 在 Luna 反复切换不稳的坑
+        public IEnumerator Fade(UnityEngine.UI.Image img, float from, float to, float dur) {
+            if (img == null) yield break;
+            img.gameObject.SetActive(true);
+            var c = img.color;
+            c.a = from;
+            img.color = c;
+            float t = 0f;
+            while (t < dur) {
+                t += Time.deltaTime;
+                c.a = Mathf.Lerp(from, to, t / dur);
+                img.color = c;
+                yield return null;
+            }
+            c.a = to;
+            img.color = c;
+            if (to <= 0.001f) img.gameObject.SetActive(false);   // 完全透明后关掉，避免遮挡点击
         }
     }
 }

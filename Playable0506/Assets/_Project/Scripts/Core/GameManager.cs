@@ -127,7 +127,36 @@ namespace RecruitPlayable {
 
         public void OnDismissClicked() {
             if (_state != GameState.Appraisal) return;
-            if (tutorialHand != null) tutorialHand.MarkUrgent();
+            // luna-build：验收反馈 #4 — Dismiss 真实回退到 Selection，带黑屏过渡
+            StartCoroutine(DismissBackToSelection());
+        }
+
+        IEnumerator DismissBackToSelection() {
+            _state = GameState.Intro;   // 中间锁定态，禁止再响应任何按钮事件
+
+            // 1. 黑屏淡入 0 → 1（0.3s）
+            if (ui != null && ui.transitionMask != null) {
+                yield return ui.Fade(ui.transitionMask, 0f, 1f, 0.3f);
+            }
+
+            // 2. 黑屏期间瞬时重置所有 Appraisal/ActionChoice 阶段的 UI（用户看不到瞬切）
+            if (ui != null) {
+                if (ui.statPanelTL != null) ui.statPanelTL.alpha = 0f;
+                if (ui.statPanelTR != null) ui.statPanelTR.alpha = 0f;
+                if (ui.statPanelBR != null) ui.statPanelBR.alpha = 0f;
+                if (ui.eliteBanner != null) ui.eliteBanner.alpha = 0f;
+                ui.ShowActionSecondary(false);
+                ui.ShowActionPrimary(false);
+                ui.HideSpeechBubble();
+            }
+
+            // 3. 重新进入 Selection 阶段（复用现有方法）
+            EnterSelection();
+
+            // 4. 黑屏淡出 1 → 0（0.3s）
+            if (ui != null && ui.transitionMask != null) {
+                yield return ui.Fade(ui.transitionMask, 1f, 0f, 0.3f);
+            }
         }
 
         void OnRecruitDone() {
