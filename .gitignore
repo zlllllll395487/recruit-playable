@@ -6,11 +6,25 @@ _raw_sources/
 
 # Build outputs
 dist/
+webgl-build/
 
 # OS
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Temporary directories
+H5小游戏/
+_raw_sources/
+
+# AI conversation logs (not part of the project)
+Claude-Unity-MCP-*.md
+
+# IDE config
+.mcp.json
+
+# External reference files
+代号Ball-*.html
 
 # Editor
 .vscode/
