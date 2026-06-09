@@ -33,7 +33,7 @@
 
 ```bash
 npx http-server -p 8080
-# 或 VSCode Live Server 扩展
+# 或 VS Code Live Server 扩展
 ```
 
 浏览器打开 `http://localhost:8080/index.html`
@@ -57,16 +57,25 @@ recruit-playable/
 │   ├── Assets/
 │   ├── ProjectSettings/
 │   └── luna.json
-└── docs/                              # 项目文档
+├── docs/                             # 项目文档
+│   ├── DESIGN.md                     # 玩法设计
+│   ├── HEROES.md                     # 英雄设定
+│   ├── ART_ASSETS.md                 # 美术资源清单
+│   ├── PRODUCTION.md                 # 生产化方案
+│   └── AI_PROMPTS.md                 # AI 生图提示
+├── CHANGELOG.md                        # 项目迭代记录
+└── README.md
 ```
 
 ## 📄 项目文档
 
-- [策划文档.md](策划文档.md) — 玩法策划
-- [英雄设定.md](英雄设定.md) — 3 个英雄（Frost / Rose / Aurora）
-- [美术资源清单.md](美术资源清单.md) — 资源规格
-- [生产化实施方案.md](生产化实施方案.md) — 生产化流程
-- [AI生图Prompt集.md](AI生图Prompt集.md) — AI 生图参考
+| 文档 | 说明 |
+|-----|------|
+| [docs/DESIGN.md](docs/DESIGN.md) | 玩法设计 |
+| [docs/HEROES.md](docs/HEROES.md) | 3 个英雄（Frost / Rose / Aurora） |
+| [docs/ART_ASSETS.md](docs/ART_ASSETS.md) | 美术资源规格 |
+| [docs/PRODUCTION.md](docs/PRODUCTION.md) | 生产化方案 |
+| [docs/AI_PROMPTS.md](docs/AI_PROMPTS.md) | AI 生图提示 |
 
 ## 🎯 投放平台支持
 
