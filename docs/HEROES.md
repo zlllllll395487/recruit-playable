@@ -1,226 +1,91 @@
-# 三英雄角色设定
+# Hero Characters
 
-> 版本：v1.0  日期：2026-05-06
-> 关联：[策划文档.md](策划文档.md) / [美术资源清单.md](美术资源清单.md)
+## Overview
 
-## 设计原则
-
-- **强差异化**：3 个英雄在 1 秒内能被视觉辨认 —— 发色、体型、服装色调、气质各不相同。
-- **三种玩家偏好覆盖**：酷 / 媚 / 萌，分别对应不同人群的"心动点"。
-- **主属性挂钩档案**：3 个英雄都是 SSR+ / ELITE，但**主属性**不同 —— 让玩家觉得"我选的最好"。
-- **统一世界观**：奇幻 / 二次元 RPG 风（类似《阴阳师》《明日方舟》《崩铁》调性）。
-- **统一构图基线**：全身正面 / 微侧站立、视线直视、光照来自镜头左上方 45°。
+This playable ad features three distinct heroes with unique looks, attributes, and personalities. Each hero has an idle pose and a 3-4 second recruitment animation video.
 
 ---
 
-## 英雄 A — 「Frost · 霜刃」
+## Hero A: Frost
 
-**主属性：Skill 96 · 战斗型**
+### Attributes
+| Attribute | Value |
+|-----------|-------|
+| Hero ID | A |
+| Hero Name | Frost |
+| Looks | 88 |
+| Skill | 99 |
+| Growth | 92 |
+| Accent Color | Gold (r:1, g:0.84, b:0.38) |
 
-### 形象
+### Resources
+- Idle Sprite: `hero_A_idle.png`
+- Recruit Video: `hero_A_recruit.mp4` (3-4 seconds)
 
-| 项目 | 设定 |
-| --- | --- |
-| **气质标签** | 冷峻、强者、精英刺客 |
-| **年龄感** | 22~25 岁 |
-| **体型** | 修长高挑（画面中身高最高），偏运动型 |
-| **发型 / 发色** | **银白色**短发齐颈 + 一缕散落额前 |
-| **瞳色** | 冰蓝色 |
-| **肤色** | 冷白 |
-| **服装** | **黑色短款军装外套** + 内衬银灰高领 + 金属护肩 + 黑色紧身长裤 + 长筒战靴；腰间悬挂一柄细长冷刃 |
-| **服装主色调** | 黑 + 银 + 冷蓝点缀 |
-| **配饰** | 左耳一颗冰晶耳钉 / 右手手套上有银色纹章 |
-| **辨识焦点** | 银发 + 黑军装 + 佩剑 |
-
-### 属性面板（鉴定阶段显示）
-
-| 属性 | 数值 | 副属性 |
-| --- | --- | --- |
-| Looks | 88 | Charisma +30% |
-| **Skill** | **96** | **Combat +50%** |
-| Growth | 90 | Discipline +35% |
-| **Overall** | **ELITE** | |
-
-### 角色特点
-
-- **称号**：霜刃执行者
-- **背景**：来自北境军事学院的天才生，剑术冠军
-- **性格关键词**：寡言、冷静、护短
-- **战斗类型**：单体高爆发 / 暗杀
-
-### 招募姿（用于 1.2 立绘 + 1.3 视频起始帧）
-
-抽出腰间冷刃半截，刀尖朝下垂于身侧；侧脸 30°回望镜头，眼神锐利但带一丝认可的微笑。**冰晶粒子从刀刃缓慢飘起**。
-
-### 视频运动描述（用于 image-to-video prompt）
-
-3~4 秒小幅度运动：
-1. 第 0~1.5s：缓慢抬头与镜头对视，发丝微动
-2. 第 1.5~3s：刀身轻转半圈，冰晶粒子飘散
-3. 第 3~3.5s：嘴角微扬（克制的微笑）
-
-### Talk 路径台词
-
-> "*Don't waste my time. I only follow the strong.*"
-
-### 高亮色（UI 描边 / 特效搭配）
-
-- 描边：**冰蓝 #6FC3FF**
+### Talk Line
+> "By Excalibur — my blade is yours!"
 
 ---
 
-## 英雄 B — 「Rose · 蔷薇」
+## Hero B: Rose
 
-**主属性：Looks 96 · 魅惑型**
+### Attributes
+| Attribute | Value |
+|-----------|-------|
+| Hero ID | B |
+| Hero Name | Rose |
+| Looks | 75 |
+| Skill | 90 |
+| Growth | 99 |
+| Accent Color | Rose (r:1, g:0.30, b:0.48) |
 
-### 形象
+### Resources
+- Idle Sprite: `hero_B_idle.png`
+- Recruit Video: `hero_B_recruit.mp4` (3-4 seconds)
 
-| 项目 | 设定 |
-| --- | --- |
-| **气质标签** | 妖艳、御姐、宫廷谋士 |
-| **年龄感** | 25~28 岁 |
-| **体型** | 凹凸有致，**画面中身高居中**，气场最强 |
-| **发型 / 发色** | **酒红 / 玫红色**长卷发披肩，一边别一朵小黑玫瑰 |
-| **瞳色** | 紫红色 |
-| **肤色** | 暖白带粉 |
-| **服装** | **酒红色高领无袖长裙** + 黑色蕾丝胸甲 + 高开叉裙摆露出长腿 + 黑色长手套至肘 + 黑色细高跟靴；腰间金色玫瑰扣 |
-| **服装主色调** | 酒红 + 黑 + 金边 |
-| **配饰** | 颈间黑丝带项圈 + 金玫瑰垂坠 / 右手持折扇（合拢） |
-| **辨识焦点** | 红卷发 + 红黑长裙 + 折扇 |
-
-### 属性面板
-
-| 属性 | 数值 | 副属性 |
-| --- | --- | --- |
-| **Looks** | **96** | **Charm +50%** |
-| Skill | 92 | Strategy +40% |
-| Growth | 88 | Influence +35% |
-| **Overall** | **ELITE** | |
-
-### 角色特点
-
-- **称号**：蔷薇宫廷使
-- **背景**：失势的贵族遗孤，靠才智重返权力中心
-- **性格关键词**：聪慧、戏谑、有距离感
-- **战斗类型**：群体控制 / 魅惑 debuff
-
-### 招募姿
-
-折扇半开遮住嘴角，**侧身扭腰回眸**抛媚眼；裙摆飘起，玫瑰花瓣从扇面散出。
-
-### 视频运动描述
-
-3~4 秒运动：
-1. 第 0~1s：折扇缓缓打开
-2. 第 1~2.5s：侧身扭腰，扇遮唇下，**抛媚眼**（眨眼）
-3. 第 2.5~3.5s：玫瑰花瓣从扇面飘散
-
-### Talk 路径台词
-
-> "*Oh, recruiting me? Bold choice. I like it.*"
-
-### 高亮色
-
-- 描边：**玫红 #FF4D7A**
+### Talk Line
+> "I've united kingdoms. Together, we conquer!"
 
 ---
 
-## 英雄 C — 「Aurora · 朝曦」
+## Hero C: Aurora
 
-**主属性：Growth 96 · 成长型**
+### Attributes
+| Attribute | Value |
+|-----------|-------|
+| Hero ID | C |
+| Hero Name | Aurora |
+| Looks | 70 |
+| Skill | 96 |
+| Growth | 88 |
+| Accent Color | Blue (r:0.43, g:0.76, b:1.0) |
 
-### 形象
+### Resources
+- Idle Sprite: `hero_C_idle.png`
+- Recruit Video: `hero_C_recruit.mp4` (3-4 seconds)
 
-| 项目 | 设定 |
-| --- | --- |
-| **气质标签** | 活泼、阳光、天才少女 |
-| **年龄感** | 16~18 岁 |
-| **体型** | 娇小灵动（画面中身高最矮），偏少女型 |
-| **发型 / 发色** | **金色双马尾**，发尾微卷，前额齐刘海 + 一对小蝴蝶结发饰 |
-| **瞳色** | 琥珀金 |
-| **肤色** | 健康暖色 |
-| **服装** | **白色 + 金边的圣职短裙制服**（百褶短裙）+ 金纽扣短袖外套 + 黑色过膝袜 + 白色尖头短靴；背后系一根白色长披风（短披）|
-| **服装主色调** | 白 + 金 + 浅黄 |
-| **配饰** | 左手腕金色魔法手环 / 胸前金色十字护符 |
-| **辨识焦点** | 金双马尾 + 白金圣职服 + 短披风 |
-
-### 属性面板
-
-| 属性 | 数值 | 副属性 |
-| --- | --- | --- |
-| Looks | 90 | Vitality +35% |
-| Skill | 88 | Magic +30% |
-| **Growth** | **96** | **Potential +60%** |
-| **Overall** | **ELITE** | |
-
-### 角色特点
-
-- **称号**：朝曦圣徒（Apprentice）
-- **背景**：神殿选拔出的转世圣女候补，未来可期
-- **性格关键词**：开朗、好奇、努力
-- **战斗类型**：辅助治疗 / 圣光增益
-
-### 招募姿
-
-**双手在胸前合十**或**举起一只手开心招呼**，原地踮脚 + 披风轻扬，**金色光点从脚下升起**。
-
-### 视频运动描述
-
-3~4 秒运动：
-1. 第 0~1.5s：双眼眨一下，露出明亮笑容
-2. 第 1.5~2.5s：踮起脚尖，**双马尾随头部轻摆**
-3. 第 2.5~3.5s：举手比一个心 / 招呼手势，金色光点上升
-
-### Talk 路径台词
-
-> "*Hi! I'll do my best, please take care of me!*"
-
-### 高亮色
-
-- 描边：**暖金 #FFD661**
+### Talk Line
+> "Heroes are forged like marble — strike by strike."
 
 ---
 
-## 横向对比一览表
+## Attribute Comparison
 
-| 维度 | A · 霜刃 | B · 蔷薇 | C · 朝曦 |
-| --- | --- | --- | --- |
-| **气质** | 冷酷 | 妖艳 | 活泼 |
-| **年龄感** | 22~25 | 25~28 | 16~18 |
-| **体型** | 高挑 | 中等 / 凹凸 | 娇小 |
-| **发色** | 银白 | 酒红 | 金黄 |
-| **服装主色** | 黑 + 银 | 酒红 + 黑 | 白 + 金 |
-| **持物** | 冷刃 | 折扇 | 魔法手环 |
-| **主属性** | Skill 96 | Looks 96 | Growth 96 |
-| **战斗定位** | 暗杀 | 控场 | 辅助 |
-| **覆盖玩家** | "酷" | "媚" | "萌" |
-| **高亮色** | 冰蓝 #6FC3FF | 玫红 #FF4D7A | 暖金 #FFD661 |
+| Hero | Looks | Skill | Growth | Accent Color |
+|------|-------|-------|--------|--------------|
+| Frost | 88 | 99 | 92 | Gold |
+| Rose | 75 | 90 | 99 | Rose |
+| Aurora | 70 | 96 | 88 | Blue |
 
 ---
 
-## 给美术 / Prompt 阶段的统一风格关键词
+## Asset Location
 
-后续生图 prompt 需稳定带上以下"风格锚定"词，保证三人一致：
+### Unity Project
+- Sprites: `Assets/_Project/Art/`
+- Videos: `Assets/_Project/Video/`
+- ScriptableObjects: `Assets/_Project/ScriptableObjects/`
 
-```
-anime / semi-realistic illustration style, full body portrait,
-front-facing standing pose, character centered,
-clean transparent background, soft cinematic lighting from upper-left 45°,
-high detail, vibrant colors, masterpiece quality,
-1080×1536 vertical composition
-```
-
-**负面词**：
-```
-extra limbs, deformed hands, blurry, low quality,
-text, watermark, multiple characters, complex background
-```
-
----
-
-## 待你确认
-
-1. **世界观风格**：当前选了"奇幻 / 二次元 RPG"。是否换为修仙 / 末世 / 现代特工 / 学园等？
-2. **角色国别 / 文化指向**：当前是泛二次元（无明确国别）。是否需偏日 / 偏中 / 偏欧美？
-3. **年龄分布**：当前 16 / 22 / 25 三档，最低是 16~18。是否需全部 18+？
-4. **形象细节微调**：A 的银白短发 / B 的酒红长卷 / C 的金双马尾，有没有想换的？
+### Native HTML
+- Sprites: `assets/`
+- Videos: Included in `Default Creative_unityads.html`

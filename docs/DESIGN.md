@@ -1,207 +1,116 @@
-# 招募 Playable 广告 — 策划文档
+# Playable Ad Design
 
-> 版本：v2.0  日期：2026-05-06
-> 类型：可玩广告（Playable Ad）
-> 参考：`playable需求.docx` + 招募场景截图
+## Overview
 
----
-
-## 1. 项目概述
-
-制作一支**第一视角**的可玩广告。玩家扮演招募官，在桌后挑选、鉴定、招募一名英雄，体验"慧眼识珠"的爽点。
-
-- **核心循环**：滑动选英雄 → 鉴定看属性 → 拍板招募 → 看招募成功演出
-- **总时长**：约 15~25 秒
-- **关键演出**：招募成功 Spine 3~4 秒
+This playable ad is a recruitment-themed interactive experience. Players act as a recruiter, selecting heroes and experiencing the recruitment process.
 
 ---
 
-## 2. 整体视觉
+## Game Flow
 
-- **视角**：第一视角，屏幕底部露出玩家的**双手**（搭在桌沿/桌面上），强化"招募官"代入感。
-- **背景**：招募处风格，角色站立在屏幕中央。
-- **镜头**：固定半身机位，角色处于画面中央。
-- **UI 风格**：圆角胶囊按钮，紫色高饱和渐变；属性面板半透明带描边。
+### 1. Hero Selection
+- Players swipe left/right to choose from 3 heroes (A, B, C)
+- Each hero has unique appearance and stats
+- Hero selected when centered with highlight outline
+- Tutorial hand guides the player
 
----
+### 2. Action Selection
+- Two options:
+  - **Talk**: Hero speaks a dialogue line (secondary path)
+  - **Appraise**: Reveal hero's attributes and rating (primary path)
+- Tutorial hand points to Appraise
 
-## 3. 玩法流程
+### 3. Appraisal Animation
+- Scan effect sweeps over hero
+- 3 attributes fly in sequentially (Looks, Skill, Growth)
+- ELITE banner slams down
+- UI switches to Recruit/Dismiss buttons
+- Tutorial hand points to Recruit
 
-### 阶段一：选角阶段（Hero Selection）
+### 4. Recruitment
+- Click Recruit to initiate sequence
+- All UI hides
+- Hero recruitment video plays (3-4 seconds)
+- End screen appears
 
-**视觉呈现**
-- 第一视角：屏幕底部露出玩家的双手，背景为招募处风格。
-- 屏幕中央站立一名待选角色。
-
-**交互逻辑**
-- 支持屏幕级**左右滑动**事件。
-- 滑动时，当前角色平滑移出屏幕，下一个角色移入屏幕。
-- 共 **3 个英雄**循环可选。
-
-**选中反馈**
-- 当角色居中且滑动停止时，角色边缘出现**高亮描边**（参考图二），向玩家暗示该对象可交互。
-- 同时出现手指引导动画，提示玩家点击。
-
----
-
-### 阶段二：动作选择阶段（Action Selection）
-
-**触发条件**
-- 玩家选择了一个英雄并在屏幕中央悬停时（角色已被高亮描边）。
-- 玩家点击该角色后进入本阶段。
-
-**UI 元素**
-- 在屏幕中下方（靠近角色腰部 / 桌面位置）弹出两个主要操作按钮：
-  - **Talk**：交谈按钮。
-  - **Appraise**：鉴定按钮，**配合手指点击的引导动效**（如图三所示）。
-- 弹出方式：从屏幕下方上滑入场，时长约 0.25 秒。
-
-**交互逻辑**
-- 引导手指**固定指向 Appraise**（鉴定为主路径）。
-- 玩家点击 **Appraise** → 进入阶段三。
-- 玩家点击 **Talk**（次要路径）：弹出一句台词气泡后自动收回，重新引导玩家点击 Appraise，**不阻塞主流程**。
+### 5. End Screen
+- CTA button to download/play the full game
 
 ---
 
-### 阶段三：鉴定结果阶段（Appraisal Results）
+## Technical Architecture
 
-**触发条件**
-- 玩家点击阶段二的 Appraise 按钮。
+### Unity Version
+- **Project**: `Playable0506/`
+- **Unity Version**: 2022.3+
+- **Build Tool**: Unity Playworks (Luna)
+- **Output**: Single HTML file (< 5 MB)
 
-**UI 元素**
-
-1. **指标面板**：在角色身体周围弹出若干数值标签，每个标签**带有指向角色的引线**。示例：
-   - **Looks**　SSR+
-   - **Skill**　SSR+
-   - **Growth**　SSR+
-
-2. **综合评级**：屏幕中下方弹出夸张的评级印章 / 立体艺术字，文案：
-   - **Overall rating: ELITE**
-
-3. **决策按钮**：底部的 Talk / Appraise 按钮消失，替换为两个最终决策按钮：
-   - **Recruit（招募）**：主按钮，亮色 / 金色，**带手指引导动效**。
-   - **Dismiss（解雇）**：次要按钮，灰色 / 暗色。
-
-**动效要求**
-- 数值面板需要"**扫描展开**"动效：扫描光带从角色头顶扫到脚底，途中触发各属性标签**依次飞入并展开引线**。
-- 综合评级文字需要"**重磅砸下**"动效：从屏幕外向下砸入，伴随震屏与冲击波光晕，"ELITE" 字体放大抖动 + 金色高光。
-- 整个鉴定演出节奏：扫描（0.5s）→ 属性依次飞入（0.6s）→ 评级砸下（0.4s），总计约 **1.5 秒**。
-
-**交互逻辑**
-- 点击 **Recruit** → 进入阶段四。
-- 点击 **Dismiss**（次要路径）：角色做一个失望动作，弹窗收回，手指持续引导玩家点击 Recruit，**最终仍走 Recruit 路径**。
+### Native HTML Version
+- **Location**: Root directory (`index.html`)
+- **Features**: 
+  - No engine dependencies
+  - Pure HTML/CSS/JS
+  - Ultra-lightweight (compressed < 5 MB)
+  - Quick to load/run on any browser
 
 ---
 
-### 阶段四：招募结算阶段（Recruitment）
+## Data Structure
 
-**触发条件**
-- 玩家点击 **Recruit** 按钮。
-
-**视觉表现**
-- **隐藏所有 UI 元素**（指标牌、按钮、评级横幅等同时淡出，约 0.2 秒）。
-- 视觉焦点完全集中在角色身上。
-- 背景可加金色粒子 / 边缘光晕，烘托氛围（不抢角色焦点）。
-
-**动画表现**
-- 播放该角色专属的 **Spine 招募成功动作**（如图五中角色挥舞警棍的动作）。
-- 持续时长：**约 3~4 秒**。
-- 配套：暖光合声音效 + 角色简短语音。
-
-**结束**
-- Spine 播放结束后淡入 End Card（结束页），引导玩家点击下载 / 跳转主游戏。
+### Hero Attributes
+Each hero has:
+- `heroId`: A, B, or C
+- `heroName`: Frost, Rose, Aurora
+- `looks`: 0-100 value
+- `skill`: 0-100 value
+- `growth`: 0-100 value
+- `talkLine`: Dialogue line when Talk is selected
+- `accentColor`: RGBA color for hero-specific UI
 
 ---
 
-## 4. 交互细节规范
+## UI States
 
-### 4.1 引导手指（Tutorial Hand）
-| 节点 | 引导内容 |
-| --- | --- |
-| 阶段一 | 左右滑动提示 |
-| 阶段二 | 点击 Appraise 按钮 |
-| 阶段三 | 点击 Recruit 按钮 |
-
-- 玩家完成对应操作后立即消失。
-- 玩家停留 3 秒无操作，引导动画放大 1.1 倍并加快频率。
-
-### 4.2 防误操作与防卡死
-- 阶段一滑动时，**轻点不立即触发选中**，需角色居中停留后再点击。
-- 所有按钮点击区域**外扩 10px**，提升移动端命中率。
-- 次要按钮（Talk / Dismiss）**不允许中断流程**，必须能引回主线。
-- 玩家全程**无法卡死、无法失败**——playable 硬规则。
-
-### 4.3 音效
-
-| 时机 | 音效 |
-| --- | --- |
-| 滑动切换英雄 | 轻 swoosh |
-| 弹窗弹出 | 轻"叮" / 弹性气泡音 |
-| Appraise 扫描 | 科幻扫描"嗡——"声 |
-| 属性面板飞入 | 三连"叮叮叮" |
-| ELITE 评级砸下 | 重音冲击 + 胜利号角 |
-| 招募成功 Spine | 暖光合声 + 角色语音 |
-
-### 4.4 性能与兼容
-- 总包体：**≤ 5 MB**（FB / Google Ads 通用上限）。
-- 输出：**单 HTML 文件**，资源内嵌。
-- 兼容：iOS Safari 14+ / Android Chrome 90+。
-- Spine 运行时：`spine-ts`；3 个角色尽量共享骨骼以减小包体。
+| State | Active Elements | Description |
+|-------|-----------------|-------------|
+| Selection | Hero carousel, Talk/Appraise buttons | Hero selection and first interaction |
+| Appraise | Scan effect, stat panels, ELITE banner, Recruit/Dismiss buttons | Attribute reveal |
+| Recruitment | Hero video only | Recruitment animation plays |
+| End | Game logo, CTA button | Final conversion screen |
 
 ---
 
-## 5. 资产清单
+## Animation Timings
 
-| 类别 | 数量 | 说明 |
-| --- | --- | --- |
-| 角色 Spine | 3 | 每个含「待机循环」「亮相一次性」「招募成功 3~4s」三组动画 |
-| 招募处背景 | 1 | 静态图，含轻微视差层 |
-| 玩家手部素材 | 1 | 桌沿 + 双手前景 PNG |
-| UI 按钮 | 4 | Talk / Appraise / Recruit / Dismiss |
-| 属性面板 | 3+ | Looks / Skill / Growth（统一紫色 SSR+ 样式） |
-| Overall rating 横幅 | 1 | "ELITE" 立体字 + 金色高光 |
-| 引导手指 | 1 | 通用素材，含点击 / 滑动两种循环 |
-| 特效贴图 | 4 | 扫描光带、属性飞入光、震屏冲击波、金色粒子 |
-| 音效 | ~6 | 见 4.3 表 |
-| 角色台词气泡 | 3 | Talk 路径用，文字 + 弹出动画 |
-| End Card 素材 | 1 | Logo + CTA（由发行方提供） |
+| Element | Duration | Notes |
+|---------|----------|-------|
+| Hero swipe | ~0.25 sec | Smooth hero carousel slide |
+| Scanline | ~0.5 sec | Sweeping light effect |
+| Stat panels | ~0.1 sec interval | Each panel flies in with slight delay |
+| ELITE banner | ~0.4 sec | Slams down with shockwave |
+| Recruitment video | 3-4 sec | Hero animation sequence |
+| Fade transitions | ~0.2 sec | Between states |
 
 ---
 
-## 6. 可配置参数
+## Platform Support
 
-```js
-const CONFIG = {
-  HERO_COUNT: 3,                    // 可选英雄数量
-  IDLE_TIMEOUT_MS: 3000,            // 无操作触发引导加强
-  SCAN_DURATION_MS: 500,            // 扫描动效时长
-  STATS_REVEAL_INTERVAL_MS: 100,    // 属性面板飞入间隔
-  RATING_DROP_DURATION_MS: 400,     // ELITE 砸下时长
-  RECRUIT_SPINE_DURATION_MS: 3500,  // 招募 Spine 时长（3~4 秒）
-  FORCE_RECRUIT_PATH: true,         // Dismiss 是否强制引回 Recruit
-  STORE_URL_IOS: '<待填>',
-  STORE_URL_ANDROID: '<待填>',
-};
-```
+This playable is designed for all major ad networks:
+- Unity Ads
+- AppLovin
+- ironSource
+- Facebook (Meta)
+- Google Ads (AdMob)
+- TikTok
+- And others supporting HTML/JS playables
 
 ---
 
-## 7. 验收标准
+## Performance Requirements
 
-- [ ] 第一视角，屏幕底部始终露出玩家双手（除阶段四演出外）。
-- [ ] 阶段一：3 个英雄滑动循环切换，居中停止时出现高亮描边。
-- [ ] 阶段二：Talk / Appraise 弹出，引导手指指向 Appraise。
-- [ ] 阶段三：扫描展开 → 属性飞入 → ELITE 砸下，三段动效齐全；按钮替换为 Recruit / Dismiss。
-- [ ] 阶段四：所有 UI 隐藏，仅角色 Spine 演出 3~4 秒。
-- [ ] 任何次要按钮（Talk / Dismiss）均能回到主路径，玩家无法卡死。
-- [ ] iOS Safari + Android Chrome 真机自测通过，包体 ≤ 5 MB。
-
----
-
-## 8. 待确认事项
-
-1. **End Card 跳转目标**：主游戏 Logo / CTA 文案 / 商店链接需发行方提供。
-2. **Talk 路径处理**：仅做台词气泡（推荐）还是完整次要分支？
-3. **属性数值**：3 个英雄是否需要数值差异（都给 SSR+ 但具体数字不同）？
-4. **多语言**：仅英文还是需多语言版本？
-5. **角色形象**：是否需按投放平台（FB / Google / TikTok）做合规收敛？
+- **Package Size**: ≤ 5 MB (compressed)
+- **Load Time**: ≤ 3 seconds (4G)
+- **FPS**: 60 FPS target
+- **Devices**: iOS 14+, Android 9+
+- **Resolution**: Vertical (portrait) 1080x1920
